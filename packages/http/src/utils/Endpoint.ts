@@ -21,6 +21,7 @@ export interface EndpointConstructorOptions<T extends URITemplateParams> {
 }
 
 export interface EndpointParseOptions {
+  json?: unknown;
   body?: unknown;
   baseURL?: string;
   headers?: Record<string, string>;
@@ -55,12 +56,19 @@ export class Endpoint<T extends URITemplateParams> {
 
   parse(
     params: T,
-    { body, headers, baseURL = this.baseURL }: EndpointParseOptions = {},
+    { json, body, headers, baseURL = this.baseURL }: EndpointParseOptions = {},
   ): EndpointParams {
     let url = this.template.expand({ ...this.defaults, ...params });
 
     if (baseURL) {
       url = baseURL + url;
+    }
+
+    headers = { ...this.headers, ...headers };
+
+    if (json != null) {
+      body = JSON.stringify(json);
+      headers = { ...headers, 'content-type': 'application/json' };
     }
 
     return {
