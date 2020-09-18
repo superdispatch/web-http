@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.build.json",
+  "exclude": [
+    "pkg",
+    "playroom.ts",
+    "**/*.stories.*",
+    "**/*.playroom.*",
+    "**/__tests__/**",
+    "**/__testutils__/**"
+  ],
+  "references": [{ "path": "../__testutils__" }],
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "pkg/dist-types"
+  }
+}
