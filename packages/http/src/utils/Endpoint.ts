@@ -22,14 +22,14 @@ export interface EndpointConstructorOptions<T extends URITemplateParams> {
 
 export interface EndpointParseOptions {
   json?: unknown;
-  body?: unknown;
+  body?: BodyInit;
   baseURL?: string;
   headers?: Record<string, string>;
 }
 
 export interface EndpointParams {
   url: string;
-  body?: unknown;
+  body?: BodyInit;
   method: string;
   headers: Record<string, string>;
 }
