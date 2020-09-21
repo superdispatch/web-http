@@ -37,15 +37,8 @@ export function createUserAPI(token: string | undefined) {
       status: 'active' | 'inactive' | 'deleted' = 'active',
       params?: { q?: string; page?: number; page_size?: number },
     ) {
-      return requestJSON<
-        { items: User[]; count: number },
-        {
-          q?: string;
-          page?: number;
-          page_size?: number;
-          status: 'active' | 'inactive' | 'deleted';
-        }
-      >(
+      // This will make `listUsers` return `Promise<{ items: User[]; count: number }>`
+      return requestJSON<{ items: User[]; count: number }>(
         // `{ status: 'active' }` -> `/users/active`
         // `{ status: 'inactive', q: 'foo' }` -> `/users/inactive?q=foo`
         '/users/{status}{?q,page,page_size}',
@@ -54,22 +47,33 @@ export function createUserAPI(token: string | undefined) {
     },
 
     getUser(id: number) {
-      return requestJSON<User, { id: number }>('/users/{id}', { id });
+      return requestJSON<
+        User,
+        // It is possible to strongly type allowed URI Template params.
+        { id: number }
+      >('/users/{id}', { id });
     },
 
     addUser(values: Pick<User, 'username' | 'fullName'>) {
-      return requestJSON<User>('POST /users', { json: values });
+      // You can pass a HTTP method in the beggining of the URI template.
+      return requestJSON<User>('POST /users', {
+        // Passing `json` will transform it's value with `JSON.stringify` and
+        // and set `content-type: application/json` header.
+        json: values,
+      });
     },
 
     editUser(id: number, values: Pick<User, 'username' | 'fullName'>) {
       return requestJSON<User, { id: number }>('PUT /users/{id}', {
+        // URI template variables will be extracted from the options.
         id,
         json: values,
       });
     },
 
-    // Sometimes we do not care about response, and using `request` is enough,
     deleteUser(id: number): Promise<Response> {
+      // When we do not care about response body we can use `request` method
+      // directly.
       return request<{ id: number }>('DELETE /users/{id}', { id });
     },
   };
