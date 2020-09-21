@@ -1,10 +1,10 @@
-const EXPRESSION_PATTERN = /{(.*?)}/g;
+const EXPRESSION_BLOCK_PATTERN = /{(.*?)}/g;
 const EXPRESSION_SEPARATOR_PATTERN = /,/g;
 
 /**
  * @see https://tools.ietf.org/html/rfc6570#section-2.2
  */
-const OPERATORS_PATTERN = new RegExp(
+const EXPRESSION_OPERATOR_PATTERN = new RegExp(
   '[' +
     // Query component beginning with "?" and consisting of  name=value pairs separated by "&"
     '?' +
@@ -30,9 +30,23 @@ function encode(value: unknown): string | undefined {
   }
 
   return encodeURIComponent(value as string).replace(
-    OPERATORS_PATTERN,
+    EXPRESSION_OPERATOR_PATTERN,
     (operator) => `%${operator.charCodeAt(0).toString(16)}`,
   );
+}
+
+export function parseExpressionBlock(
+  expressionBlock: string,
+): [operator: string, variables: string[]] {
+  const firstChar = expressionBlock.charAt(0);
+  let operator = '';
+
+  if (firstChar.match(EXPRESSION_OPERATOR_PATTERN)) {
+    operator = firstChar;
+    expressionBlock = expressionBlock.slice(1);
+  }
+
+  return [operator, expressionBlock.split(EXPRESSION_SEPARATOR_PATTERN)];
 }
 
 // Using `any` as a workaround for `Index signature is missing in type` error.
@@ -46,80 +60,31 @@ export function parseURITemplate<T extends URITemplateParams>(
   template: string,
   params: T,
 ): string {
-  return template.replace(EXPRESSION_PATTERN, (_, expression: string) => {
-    const values = new Map<string, string>();
-    let operator: string = expression.charAt(0);
+  return template.replace(
+    EXPRESSION_BLOCK_PATTERN,
+    (_, expressionBlock: string) => {
+      const values = new Map<string, string>();
+      const [operator, variables] = parseExpressionBlock(expressionBlock);
 
-    if (operator.match(OPERATORS_PATTERN)) {
-      expression = expression.slice(1);
-    } else {
-      operator = '';
-    }
+      for (const variable of variables) {
+        let value = encode(params[variable]);
 
-    for (const variable of expression.split(EXPRESSION_SEPARATOR_PATTERN)) {
-      let value = encode(params[variable]);
-
-      if (value != null) {
-        values.set(variable, value);
-      }
-    }
-
-    if (operator === '?' || operator === '&') {
-      const query = Array.from(values, (entry) => entry.join('=')).join('&');
-
-      if (!query) {
-        return '';
+        if (value != null) {
+          values.set(variable, value);
+        }
       }
 
-      return operator + query;
-    }
+      if (operator === '?' || operator === '&') {
+        const query = Array.from(values, (entry) => entry.join('=')).join('&');
 
-    return Array.from(values.values()).join(',');
-  });
-}
-
-export class ParseURITemplate<T extends URITemplateParams> {
-  protected template: string;
-
-  constructor(template: string) {
-    this.template = template;
-  }
-
-  expand(params: T): string {
-    return this.template.replace(
-      EXPRESSION_PATTERN,
-      (_, expression: string) => {
-        const values = new Map<string, string>();
-        let operator: string = expression.charAt(0);
-
-        if (operator.match(OPERATORS_PATTERN)) {
-          expression = expression.slice(1);
-        } else {
-          operator = '';
+        if (!query) {
+          return '';
         }
 
-        for (const variable of expression.split(EXPRESSION_SEPARATOR_PATTERN)) {
-          let value = encode(params[variable]);
+        return operator + query;
+      }
 
-          if (value != null) {
-            values.set(variable, value);
-          }
-        }
-
-        if (operator === '?' || operator === '&') {
-          const query = Array.from(values, (entry) => entry.join('=')).join(
-            '&',
-          );
-
-          if (!query) {
-            return '';
-          }
-
-          return operator + query;
-        }
-
-        return Array.from(values.values()).join(',');
-      },
-    );
-  }
+      return Array.from(values.values()).join(',');
+    },
+  );
 }
