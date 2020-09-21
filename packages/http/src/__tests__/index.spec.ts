@@ -6,6 +6,7 @@ test('public api', () => {
       "HTTPError": [Function],
       "createHTTP": [Function],
       "parseEndpoint": [Function],
+      "parseURITemplate": [Function],
     }
   `);
 });

@@ -25,7 +25,7 @@ export interface HTTP {
     options?: TParams & HTTPRequestOptions,
   ) => Promise<Response>;
 
-  requestJSON: <TData, TParams extends URITemplateParams>(
+  requestJSON: <TData, TParams extends URITemplateParams = URITemplateParams>(
     endpoint: string,
     options?: TParams & HTTPRequestJSONOptions<TData>,
   ) => Promise<TData>;
@@ -86,10 +86,7 @@ export function createHTTP({
     });
   }
 
-  function requestJSON<
-    TData,
-    TParams extends URITemplateParams = URITemplateParams
-  >(
+  function requestJSON<TData, TParams extends URITemplateParams>(
     endpoint: string,
     options?: TParams & HTTPRequestJSONOptions<TData>,
   ): Promise<TData> {
