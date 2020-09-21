@@ -1,0 +1,7 @@
+{
+  "buildCommand": "build",
+  "packages": ["packages/http"],
+  "publishDirectory": {
+    "@superdispatch/http": "packages/http/pkg"
+  }
+}
