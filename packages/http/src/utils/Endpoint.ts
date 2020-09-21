@@ -1,4 +1,4 @@
-import { URITemplate, URITemplateParams } from './URITemplate';
+import { parseURITemplate, URITemplateParams } from './parseURITemplate';
 
 const METHOD_PATTERN = /^([\w]+) (.+)/;
 
@@ -39,7 +39,6 @@ export class Endpoint<T extends URITemplateParams> {
   protected method: string;
   protected baseURL?: string;
   protected defaults: Partial<T>;
-  protected template: URITemplate<T>;
   protected headers: Record<string, string>;
 
   constructor(
@@ -51,14 +50,13 @@ export class Endpoint<T extends URITemplateParams> {
     this.baseURL = baseURL;
     this.headers = { ...headers };
     this.defaults = { ...defaults };
-    this.template = new URITemplate(this.url);
   }
 
   parse(
     params: T,
     { json, body, headers, baseURL = this.baseURL }: EndpointParseOptions = {},
   ): EndpointParams {
-    let url = this.template.expand({ ...this.defaults, ...params });
+    let url = parseURITemplate(this.url, { ...this.defaults, ...params });
 
     if (baseURL) {
       url = baseURL + url;

@@ -1,4 +1,4 @@
-import { URITemplate } from '../URITemplate';
+import { parseURITemplate } from '../parseURITemplate';
 
 const context = {
   count: ['one', 'two', 'three'],
@@ -42,9 +42,7 @@ describe('simple string expansion', () => {
     ${'{list}'}      | ${'red,green,blue'}
     ${'{keys}'}      | ${'semi,%3B,dot,.,comma,%2C'}
   `('$template -> $output', ({ template, output }) => {
-    const uriTemplate = new URITemplate(template);
-
-    expect(uriTemplate.expand(context)).toBe(output);
+    expect(parseURITemplate(template, context)).toBe(output);
   });
 });
 
@@ -64,9 +62,7 @@ describe('form-style query expansion', () => {
     ${'{?list}'}      | ${'?list=red,green,blue'}
     ${'{?keys}'}      | ${'?keys=semi,%3B,dot,.,comma,%2C'}
   `('$template -> $output', ({ template, output }) => {
-    const uriTemplate = new URITemplate(template);
-
-    expect(uriTemplate.expand(context)).toBe(output);
+    expect(parseURITemplate(template, context)).toBe(output);
   });
 });
 
@@ -86,8 +82,6 @@ describe('form-style query continuation', () => {
     ${'{&list}'}        | ${'&list=red,green,blue'}
     ${'{&keys}'}        | ${'&keys=semi,%3B,dot,.,comma,%2C'}
   `('$template -> $output', ({ template, output }) => {
-    const uriTemplate = new URITemplate(template);
-
-    expect(uriTemplate.expand(context)).toBe(output);
+    expect(parseURITemplate(template, context)).toBe(output);
   });
 });
