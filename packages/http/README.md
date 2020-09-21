@@ -29,12 +29,6 @@ export interface User {
   updatedAt: number;
 }
 
-export interface UserListParams {
-  q?: string;
-  page?: number;
-  page_size?: number;
-}
-
 export function createUserAPI(token: string | undefined) {
   const { request, requestJSON } = createAPI(token);
 
