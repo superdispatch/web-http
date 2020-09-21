@@ -34,20 +34,16 @@ export interface UserListParams {
   page?: number;
   page_size?: number;
 }
-export interface UserListResult {
-  items: User[];
-  count: number;
-}
 
 export function createUserAPI(token: string | undefined) {
   const { requestJSON } = createAPI(token);
 
   return {
-    listUsers(params?: UserListParams) {
-      return requestJSON<UserListResult, UserListParams>(
-        '/users{?q,page,page_size}',
-        params,
-      );
+    listUsers(params?: { q?: string; page?: number; page_size?: number }) {
+      return requestJSON<
+        { items: User[]; count: number },
+        { q?: string; page?: number; page_size?: number }
+      >('/users{?q,page,page_size}', params);
     },
 
     getUser(id: number) {
@@ -59,11 +55,14 @@ export function createUserAPI(token: string | undefined) {
     },
 
     editUser(id: number, values: Pick<User, 'username' | 'fullName'>) {
-      return requestJSON<User>('PUT /users/{id}', { id, json: values });
+      return requestJSON<User, { id: number }>('PUT /users/{id}', {
+        id,
+        json: values,
+      });
     },
 
     deleteUser(id: number) {
-      return requestJSON<User>('DELETE /users/{id}', { id });
+      return requestJSON<User, { id: number }>('DELETE /users/{id}', { id });
     },
   };
 }
