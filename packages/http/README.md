@@ -11,7 +11,7 @@ yarn add @superdispatch/http
 
 #### Usage
 
-```tsx
+```ts
 import { createHTTP } from '@superdispatch/http';
 
 export function createAPI(token: string | undefined) {
