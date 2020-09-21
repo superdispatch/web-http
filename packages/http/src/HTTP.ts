@@ -86,7 +86,10 @@ export function createHTTP({
     });
   }
 
-  function requestJSON<TData, TParams extends URITemplateParams>(
+  function requestJSON<
+    TData,
+    TParams extends URITemplateParams = URITemplateParams
+  >(
     endpoint: string,
     options?: TParams & HTTPRequestJSONOptions<TData>,
   ): Promise<TData> {
