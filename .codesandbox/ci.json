@@ -2,6 +2,7 @@
   "buildCommand": "build",
   "packages": ["packages/http"],
   "publishDirectory": {
-    "@superdispatch/http": "packages/http/pkg"
+    "@superdispatch/http": "packages/http/pkg",
+    "@superdispatch/http-resource": "packages/http-resource/pkg"
   }
 }
