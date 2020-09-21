@@ -17,7 +17,7 @@ test.each([
   ['http://example.com/api', 'http://example.com/api/users'],
   ['http://example.com/api/v1', 'http://example.com/api/v1/users'],
 ])('baseURL: %p -> %p', (baseURL, result) => {
-  expect(parseEndpoint('/users', undefined, { baseURL })).toMatchObject({
+  expect(parseEndpoint('/users', { baseURL })).toMatchObject({
     url: result,
   });
 });
@@ -30,7 +30,7 @@ test.each([
     { 'content-type': 'plain/text', 'Content-Type': 'application/json' },
   ],
 ])('header: %p -> %p', (headers, result) => {
-  expect(parseEndpoint('/users', undefined, { headers })).toMatchObject({
+  expect(parseEndpoint('/users', { headers })).toMatchObject({
     headers: result,
   });
 });
@@ -39,7 +39,7 @@ test.each([
   [undefined, undefined],
   ['text', 'text'],
 ])('body: %p -> %p', (body, result) => {
-  expect(parseEndpoint('/users', undefined, { body })).toMatchObject({
+  expect(parseEndpoint('/users', { body })).toMatchObject({
     body: result,
   });
 });
@@ -50,9 +50,7 @@ test.each([
   [{ object: true }, '{"object":true}'],
   [['arr', 'ay'], '["arr","ay"]'],
 ])('json: %p -> %p', (json, result) => {
-  expect(parseEndpoint('/users', undefined, { json })).toMatchObject({
-    body: result,
-  });
+  expect(parseEndpoint('/users', { json })).toMatchObject({ body: result });
 });
 
 test.each([
@@ -71,9 +69,12 @@ test.each([
   [{ page_size: 5 }, '/users?page_size=5'],
   [{ page: 2, page_size: 5 }, '/users?page=2&page_size=5'],
 ])('query expansion: %p -> %p', (params, url) => {
-  expect(parseEndpoint('/users{?page,page_size}', params)).toMatchObject({
-    url,
-  });
+  expect(
+    parseEndpoint<{ page?: number; page_size?: number }>(
+      '/users{?page,page_size}',
+      params,
+    ),
+  ).toMatchObject({ url });
 });
 
 test.each([
@@ -82,7 +83,10 @@ test.each([
   [{ q: 'foo' }, '/users?page_size=10&q=foo'],
   [{ page: 1, q: 'foo' }, '/users?page_size=10&q=foo&page=1'],
 ])('query continuation: %p -> %p', (params, url) => {
-  expect(parseEndpoint('/users?page_size=10{&q,page}', params)).toMatchObject({
-    url,
-  });
+  expect(
+    parseEndpoint<{ page?: number; q?: string }>(
+      '/users?page_size=10{&q,page}',
+      params,
+    ),
+  ).toMatchObject({ url });
 });
