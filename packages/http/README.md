@@ -36,14 +36,27 @@ export interface UserListParams {
 }
 
 export function createUserAPI(token: string | undefined) {
-  const { requestJSON } = createAPI(token);
+  const { request, requestJSON } = createAPI(token);
 
   return {
-    listUsers(params?: { q?: string; page?: number; page_size?: number }) {
+    listUsers(
+      status: 'active' | 'inactive' | 'deleted' = 'active',
+      params?: { q?: string; page?: number; page_size?: number },
+    ) {
       return requestJSON<
         { items: User[]; count: number },
-        { q?: string; page?: number; page_size?: number }
-      >('/users{?q,page,page_size}', params);
+        {
+          q?: string;
+          page?: number;
+          page_size?: number;
+          status: 'active' | 'inactive' | 'deleted';
+        }
+      >(
+        // `{ status: 'active' }` -> `/users/active`
+        // `{ status: 'inactive', q: 'foo' }` -> `/users/inactive?q=foo`
+        '/users/{status}{?q,page,page_size}',
+        { status, ...params },
+      );
     },
 
     getUser(id: number) {
@@ -61,8 +74,9 @@ export function createUserAPI(token: string | undefined) {
       });
     },
 
-    deleteUser(id: number) {
-      return requestJSON<User, { id: number }>('DELETE /users/{id}', { id });
+    // Sometimes we do not care about response, and using `request` is enough,
+    deleteUser(id: number): Promise<Response> {
+      return request<{ id: number }>('DELETE /users/{id}', { id });
     },
   };
 }
