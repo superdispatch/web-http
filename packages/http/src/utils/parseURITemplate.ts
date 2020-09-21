@@ -35,7 +35,7 @@ function encode(value: unknown): string | undefined {
   );
 }
 
-export function parseExpressionBlock(
+function parseExpressionBlock(
   expressionBlock: string,
 ): [operator: string, variables: string[]] {
   const firstChar = expressionBlock.charAt(0);
