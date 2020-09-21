@@ -25,7 +25,7 @@ function parseEndpointTemplate<T extends URITemplateParams>(
 export interface Endpoint {
   url: string;
   method: string;
-  body: undefined | BodyInit;
+  body?: BodyInit;
   headers: Record<string, string>;
 }
 
@@ -43,7 +43,6 @@ export function parseEndpoint<T extends URITemplateParams>(
   const endpoint: Endpoint = {
     headers: {},
     url: template,
-    body: undefined,
     method: DEFAULT_METHOD,
   };
 

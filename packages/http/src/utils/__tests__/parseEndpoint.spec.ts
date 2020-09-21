@@ -35,22 +35,20 @@ test.each([
   });
 });
 
-test.each([
-  [undefined, undefined],
-  ['text', 'text'],
-])('body: %p -> %p', (body, result) => {
-  expect(parseEndpoint('/users', { body })).toMatchObject({
+test.each([['text', 'text']])('body: %p -> %p', (body, result) => {
+  expect(parseEndpoint('POST /users', { body })).toMatchObject({
     body: result,
   });
 });
 
 test.each([
-  [undefined, undefined],
   ['text', '"text"'],
   [{ object: true }, '{"object":true}'],
   [['arr', 'ay'], '["arr","ay"]'],
 ])('json: %p -> %p', (json, result) => {
-  expect(parseEndpoint('/users', { json })).toMatchObject({ body: result });
+  expect(parseEndpoint('POST /users', { json })).toMatchObject({
+    body: result,
+  });
 });
 
 test.each([
