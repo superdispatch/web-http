@@ -51,34 +51,38 @@ function inputToKey<TParams extends URITemplateParams>(
   return argsToKey(inputToArgs(input));
 }
 
-export interface HTTPResourceOptions<TData>
-  extends Omit<ConfigInterface<TData, Error>, 'fetcher' | 'suspense'> {
-  skip?: boolean;
-}
+export type HTTPResourceOptions<TData> = Omit<
+  ConfigInterface<TData, Error>,
+  'fetcher' | 'suspense'
+>;
 
 export function useHTTPResource<
   TData,
   TParams extends URITemplateParams = URITemplateParams
 >(
-  input: HTTPResourceInput<TParams>,
+  input: null | undefined | HTTPResourceInput<TParams>,
   fetcher: HTTPResourceFetcher<TData>,
-  { skip, compare = deepEqual, ...options }: HTTPResourceOptions<TData> = {},
+  { compare = deepEqual, ...options }: HTTPResourceOptions<TData> = {},
 ): ResponseInterface<TData, Error> {
-  const [template, params, key] = useDeepEqualMemo(
+  const [key, template, params] = useDeepEqualMemo(
     () => {
+      if (input == null) {
+        return [null];
+      }
+
       const [nextTemplate, nextParams] = inputToArgs(input);
       const nextKey = argsToKey([nextTemplate, nextParams]);
 
-      return [nextTemplate, nextParams, nextKey];
+      return [nextKey, nextTemplate, nextParams];
     },
     [input],
     compare,
   );
 
-  return useSWR<TData, Error>(skip ? null : key, {
+  return useSWR<TData, Error>(key, {
     ...options,
     compare,
-    fetcher: () => fetcher(template, params),
+    fetcher: !template ? undefined : () => fetcher(template, params),
   });
 }
 
