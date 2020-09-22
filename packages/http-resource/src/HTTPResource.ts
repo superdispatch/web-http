@@ -1,48 +1,104 @@
-import { ParseEndpointOptions, URITemplateParams } from '@superdispatch/http';
+import {
+  HTTPEndpointParams,
+  parseHTTPEndpoint,
+  URITemplateParams,
+} from '@superdispatch/http';
 import deepEqual from 'fast-deep-equal';
 import useSWR, {
+  cache,
   ConfigInterface,
+  mutate as mutateSWR,
   responseInterface as ResponseInterface,
 } from 'swr';
 
 import { useDeepEqualMemo } from './utils/useDeepEqualMemo';
 
-export type HTTPResourceKey<T extends URITemplateParams> =
-  | string
-  | [template: string, params: T & ParseEndpointOptions];
-
-function normalizeHTTPResourceKey<T extends URITemplateParams>(
-  key: HTTPResourceKey<T>,
-): [template: string, params?: T & ParseEndpointOptions] {
-  return typeof key === 'string' ? [key] : key;
-}
-
 export type HTTPResourceFetcher<
   TData,
   TParams extends URITemplateParams = URITemplateParams
-> = (
-  template: string,
-  options?: TParams & ParseEndpointOptions,
-) => Promise<TData>;
+> = (template: string, options?: HTTPEndpointParams<TParams>) => Promise<TData>;
 
-export type HTTPResourceOptions<TData> = Omit<
-  ConfigInterface<TData, Error>,
-  'fetcher' | 'suspense'
->;
+export type HTTPResourceFetcherArgs<
+  TParams extends URITemplateParams
+> = Parameters<HTTPResourceFetcher<unknown, TParams>>;
+
+export type HTTPResourceInput<TParams extends URITemplateParams> =
+  | string
+  | Required<HTTPResourceFetcherArgs<TParams>>;
+
+function inputToArgs<TParams extends URITemplateParams>(
+  input: HTTPResourceInput<TParams>,
+): HTTPResourceFetcherArgs<TParams> {
+  return typeof input === 'string' ? [input] : input;
+}
+
+function argsToKey<TParams extends URITemplateParams>(
+  args: HTTPResourceFetcherArgs<TParams>,
+): string {
+  const { url, body, method } = parseHTTPEndpoint(...args);
+  const keys = [method, url];
+
+  if (typeof body == 'string') {
+    keys.push(body);
+  }
+
+  return keys.join(' ');
+}
+
+function inputToKey<TParams extends URITemplateParams>(
+  input: HTTPResourceInput<TParams>,
+): string {
+  return argsToKey(inputToArgs(input));
+}
+
+export interface HTTPResourceOptions<TData>
+  extends Omit<ConfigInterface<TData, Error>, 'fetcher' | 'suspense'> {
+  skip?: boolean;
+}
 
 export function useHTTPResource<
   TData,
   TParams extends URITemplateParams = URITemplateParams
 >(
-  key: HTTPResourceKey<TParams>,
+  input: HTTPResourceInput<TParams>,
   fetcher: HTTPResourceFetcher<TData>,
-  { compare = deepEqual, ...options }: HTTPResourceOptions<TData> = {},
+  { skip, compare = deepEqual, ...options }: HTTPResourceOptions<TData> = {},
 ): ResponseInterface<TData, Error> {
-  const swrKey = useDeepEqualMemo(
-    () => normalizeHTTPResourceKey(key),
-    [key],
+  const [template, params, key] = useDeepEqualMemo(
+    () => {
+      const [nextTemplate, nextParams] = inputToArgs(input);
+      const nextKey = argsToKey([nextTemplate, nextParams]);
+
+      return [nextTemplate, nextParams, nextKey];
+    },
+    [input],
     compare,
   );
 
-  return useSWR<TData, Error>(swrKey, { ...options, compare, fetcher });
+  return useSWR<TData, Error>(skip ? null : key, {
+    ...options,
+    compare,
+    fetcher: () => fetcher(template, params),
+  });
+}
+
+export function revalidateHTTPResource<TParams extends URITemplateParams>(
+  input: HTTPResourceInput<TParams>,
+): Promise<void> {
+  return mutateSWR(inputToKey(input)) as Promise<void>;
+}
+
+export function mutateHTTPResource<
+  TData,
+  TParams extends URITemplateParams = URITemplateParams
+>(
+  input: HTTPResourceInput<TParams>,
+  fn: (prev: TData) => TData,
+  shouldRevalidate?: boolean,
+) {
+  return mutateSWR(inputToKey(input), fn, shouldRevalidate) as Promise<void>;
+}
+
+export function clearHTTPResourceCache() {
+  cache.clear();
 }
