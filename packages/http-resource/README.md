@@ -53,9 +53,6 @@ export function useAPI() {
 export interface User {
   id: number;
   username: string;
-  fullName: string;
-  createdAt: number;
-  updatedAt: number;
 }
 
 export function useUsersPage(
