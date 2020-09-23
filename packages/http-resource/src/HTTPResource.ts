@@ -5,13 +5,9 @@ import useSWR, {
   responseInterface as SWRResponseInterface,
 } from 'swr';
 
-import {
-  argsToKey,
-  HTTPResourceFetcher,
-  HTTPResourceInput,
-  inputToArgs,
-} from './utils/types';
-import { useDeepEqualMemo } from './utils/useDeepEqualMemo';
+import { useDeepEqualMemo } from './internal/useDeepEqualMemo';
+import { argsToKey, inputToArgs } from './internal/utils';
+import { HTTPResourceFetcher, HTTPResourceInput } from './types';
 
 export type HTTPResourceOptions<TData> = Omit<
   SWRConfigInterface<TData, Error>,

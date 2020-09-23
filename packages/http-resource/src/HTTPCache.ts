@@ -1,7 +1,8 @@
 import { URITemplateParams } from '@superdispatch/http';
 import { cache, mutate as mutateSWR } from 'swr';
 
-import { HTTPResourceInput, inputToKey } from './utils/types';
+import { inputToKey } from './internal/utils';
+import { HTTPResourceInput } from './types';
 
 export function revalidateHTTPResource<TParams extends URITemplateParams>(
   input: HTTPResourceInput<TParams>,

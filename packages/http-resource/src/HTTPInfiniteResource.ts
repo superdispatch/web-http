@@ -10,13 +10,9 @@ import {
   useSWRInfinite,
 } from 'swr';
 
-import {
-  argsToKey,
-  HTTPResourceFetcher,
-  HTTPResourceInput,
-  inputToArgs,
-} from './utils/types';
-import { useDeepEqualMemo } from './utils/useDeepEqualMemo';
+import { useDeepEqualMemo } from './internal/useDeepEqualMemo';
+import { argsToKey, inputToArgs } from './internal/utils';
+import { HTTPResourceFetcher, HTTPResourceInput } from './types';
 
 export type HTTPInfiniteResourceOptions<TData> = Omit<
   SWRInfiniteConfigInterface<TData, Error>,

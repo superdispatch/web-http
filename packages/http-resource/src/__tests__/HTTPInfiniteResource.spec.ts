@@ -5,7 +5,7 @@ import {
   HTTPInfiniteResourceParamFactory,
   useHTTPInfiniteResource,
 } from '../HTTPInfiniteResource';
-import { HTTPResourceFetcherArgs, HTTPResourceInput } from '../utils/types';
+import { HTTPResourceFetcherArgs, HTTPResourceInput } from '../types';
 
 let fetcher: jest.Mock;
 
