@@ -11,6 +11,6 @@ export type HTTPResourceFetcherArgs<
 
 export type HTTPResourceInput<TParams extends URITemplateParams> =
   | string
-  | Required<HTTPResourceFetcherArgs<TParams>>;
+  | HTTPResourceFetcherArgs<TParams>;
 
 export type HTTPResourceKey = [method: string, url: string, body?: string];
