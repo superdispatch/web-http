@@ -1,15 +1,15 @@
-### `@superdispatch/http`
+## `@superdispatch/http`
 
 [![npm](https://img.shields.io/npm/v/@superdispatch/http)](https://www.npmjs.com/package/@superdispatch/http)
 [![npm minzipped size](https://img.shields.io/bundlephobia/minzip/@superdispatch/http.svg)](https://bundlephobia.com/result?p=@superdispatch/http)
 
-#### Installation
+### Installation
 
 ```bash
 yarn add @superdispatch/http
 ```
 
-#### Usage
+### Usage
 
 ```ts
 import { createHTTP } from '@superdispatch/http';

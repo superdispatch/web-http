@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.build.json",
+  "exclude": ["pkg", "**/__tests__/**", "**/__testutils__/**"],
+  "references": [{ "path": "../http" }],
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "pkg/dist-types"
+  }
+}

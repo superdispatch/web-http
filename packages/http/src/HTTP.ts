@@ -1,8 +1,11 @@
 import { HTTPError } from './HTTPError';
-import { parseEndpoint, ParseEndpointOptions } from './utils/parseEndpoint';
+import {
+  HTTPEndpointOptions,
+  parseHTTPEndpoint,
+} from './utils/parseHTTPEndpoint';
 import { URITemplateParams } from './utils/parseURITemplate';
 
-export interface HTTPRequestOptions extends ParseEndpointOptions {
+export interface HTTPRequestOptions extends HTTPEndpointOptions {
   signal?: AbortSignal;
 }
 
@@ -11,7 +14,7 @@ export interface HTTPRequestJSONOptions<TData> extends HTTPRequestOptions {
 }
 
 export interface HTTPOptions
-  extends Pick<ParseEndpointOptions, 'baseURL' | 'headers'> {
+  extends Pick<HTTPEndpointOptions, 'baseURL' | 'headers'> {
   fetch?: typeof fetch;
 }
 
@@ -25,7 +28,7 @@ export interface HTTP {
     options?: TParams & HTTPRequestOptions,
   ) => Promise<Response>;
 
-  requestJSON: <TData, TParams extends URITemplateParams>(
+  requestJSON: <TData, TParams extends URITemplateParams = URITemplateParams>(
     endpoint: string,
     options?: TParams & HTTPRequestJSONOptions<TData>,
   ) => Promise<TData>;
@@ -41,7 +44,7 @@ export function createHTTP({
     options?: TParams & HTTPRequestOptions,
   ): Promise<Response> {
     let signal: undefined | AbortSignal;
-    let endpointOptions: ParseEndpointOptions = {};
+    let endpointOptions: HTTPEndpointOptions = {};
 
     if (options) {
       ({ signal, ...endpointOptions } = options);
@@ -58,7 +61,7 @@ export function createHTTP({
       };
     }
 
-    const endpoint = parseEndpoint(template, endpointOptions);
+    const endpoint = parseHTTPEndpoint(template, endpointOptions);
 
     const init: RequestInit = {
       method: endpoint.method,
@@ -86,10 +89,7 @@ export function createHTTP({
     });
   }
 
-  function requestJSON<
-    TData,
-    TParams extends URITemplateParams = URITemplateParams
-  >(
+  function requestJSON<TData, TParams extends URITemplateParams>(
     endpoint: string,
     options?: TParams & HTTPRequestJSONOptions<TData>,
   ): Promise<TData> {

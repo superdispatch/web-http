@@ -22,25 +22,28 @@ function parseEndpointTemplate<T extends URITemplateParams>(
   return [method.toUpperCase(), url];
 }
 
-export interface Endpoint {
+export interface HTTPEndpoint {
   url: string;
   method: string;
   body?: BodyInit;
   headers: Record<string, string>;
 }
 
-export interface ParseEndpointOptions {
+export interface HTTPEndpointOptions {
   json?: unknown;
   body?: BodyInit;
   baseURL?: string;
   headers?: Record<string, string>;
 }
 
-export function parseEndpoint<T extends URITemplateParams>(
+export type HTTPEndpointParams<T extends URITemplateParams> = T &
+  HTTPEndpointOptions;
+
+export function parseHTTPEndpoint<T extends URITemplateParams>(
   template: string,
-  options?: T & ParseEndpointOptions,
-): Endpoint {
-  const endpoint: Endpoint = {
+  options?: HTTPEndpointParams<T>,
+): HTTPEndpoint {
+  const endpoint: HTTPEndpoint = {
     headers: {},
     url: template,
     method: DEFAULT_METHOD,

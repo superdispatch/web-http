@@ -5,7 +5,8 @@ test('public api', () => {
     Object {
       "HTTPError": [Function],
       "createHTTP": [Function],
-      "parseEndpoint": [Function],
+      "parseHTTPEndpoint": [Function],
+      "parseURITemplate": [Function],
     }
   `);
 });
