@@ -130,7 +130,7 @@ test.each([
 
 test('skip', async () => {
   const { result, rerender, waitForValueToChange } = renderHook(
-    ({ skip }) => useHTTPResource(skip ? undefined : '/users', fetcher),
+    ({ skip }) => useHTTPResource(skip ? null : '/users', fetcher),
     { initialProps: { skip: true } },
   );
 

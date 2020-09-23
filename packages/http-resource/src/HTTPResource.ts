@@ -1,8 +1,8 @@
 import { URITemplateParams } from '@superdispatch/http';
 import deepEqual from 'fast-deep-equal';
 import useSWR, {
-  ConfigInterface,
-  responseInterface as ResponseInterface,
+  ConfigInterface as SWRConfigInterface,
+  responseInterface as SWRResponseInterface,
 } from 'swr';
 
 import {
@@ -14,7 +14,7 @@ import {
 import { useDeepEqualMemo } from './utils/useDeepEqualMemo';
 
 export type HTTPResourceOptions<TData> = Omit<
-  ConfigInterface<TData, Error>,
+  SWRConfigInterface<TData, Error>,
   'fetcher' | 'suspense'
 >;
 
@@ -22,10 +22,10 @@ export function useHTTPResource<
   TData,
   TParams extends URITemplateParams = URITemplateParams
 >(
-  input: null | undefined | HTTPResourceInput<TParams>,
+  input: null | HTTPResourceInput<TParams>,
   fetcher: HTTPResourceFetcher<TData>,
   { compare = deepEqual, ...options }: HTTPResourceOptions<TData> = {},
-): ResponseInterface<TData, Error> {
+): SWRResponseInterface<TData, Error> {
   const [key, template, params] = useDeepEqualMemo(
     () => {
       if (input == null) {
