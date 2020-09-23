@@ -48,6 +48,7 @@ test.each([
 ])('json: %p -> %p', (json, result) => {
   expect(parseHTTPEndpoint('POST /users', { json })).toMatchObject({
     body: result,
+    headers: { 'content-type': 'application/json' },
   });
 });
 

@@ -6,6 +6,7 @@ test('public api', () => {
       "clearHTTPResourceCache": [Function],
       "mutateHTTPResource": [Function],
       "revalidateHTTPResource": [Function],
+      "useHTTPInfiniteResource": [Function],
       "useHTTPResource": [Function],
     }
   `);
