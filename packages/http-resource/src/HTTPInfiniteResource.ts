@@ -28,6 +28,11 @@ export type HTTPInfiniteResourceParamFactory<
   TParams extends URITemplateParams = URITemplateParams
 > = (index: number, prev: TData | null) => null | HTTPEndpointParams<TParams>;
 
+export type HTTPInfiniteResource<TData> = SWRInfiniteResponseInterface<
+  TData,
+  Error
+>;
+
 export function useHTTPInfiniteResource<
   TData,
   TParams extends URITemplateParams = URITemplateParams
@@ -36,7 +41,7 @@ export function useHTTPInfiniteResource<
   makeParams: HTTPInfiniteResourceParamFactory<TData, TParams>,
   fetcher: HTTPResourceFetcher<TData>,
   { compare = deepEqual, ...options }: HTTPInfiniteResourceOptions<TData> = {},
-): SWRInfiniteResponseInterface<TData, Error> {
+): HTTPInfiniteResource<TData> {
   const [template, baseParams] = useDeepEqualMemo(
     () => inputToArgs(input),
     [input],
