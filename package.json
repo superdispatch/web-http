@@ -43,7 +43,8 @@
     ],
     "resetMocks": true,
     "roots": [
-      "<rootDir>/packages/http/"
+      "<rootDir>/packages/http/",
+      "<rootDir>/packages/http-resource/"
     ],
     "setupFilesAfterEnv": [
       "<rootDir>/setupTests.ts"
@@ -68,8 +69,11 @@
     "@superdispatch/js-tools": "^0.2.0",
     "@superdispatch/prettier-config": "^0.2.0",
     "@superdispatch/tsconfig": "^0.2.0",
+    "@testing-library/react-hooks": "^3.4.1",
     "@types/jest": "^26.0.0",
+    "@types/lodash": "^4.14.161",
     "@types/node-fetch": "^2.5.7",
+    "@types/react": "^16.9.49",
     "babel-jest": "^26.3.0",
     "eslint": "^7.2.0",
     "husky": "^4.2.3",
@@ -77,8 +81,11 @@
     "jest-watch-typeahead": "^0.6.0",
     "lerna": "^3.22.1",
     "lint-staged": "^10.2.10",
+    "lodash": "^4.17.20",
     "node-fetch": "^2.6.1",
     "prettier": "^2.1.2",
+    "react": "^16.13.1",
+    "react-test-renderer": "^16.13.1",
     "typescript": "~4.0.0"
   },
   "engines": {

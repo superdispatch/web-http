@@ -1,12 +1,10 @@
 import { parseURITemplate } from '../parseURITemplate';
 
 const context = {
-  count: ['one', 'two', 'three'],
-  dom: ['example.com'],
-  dub: 'me/too',
+  email: 'john.doe@example.com',
+  url: 'http://example.com/home/?hello=world',
   hello: 'Hello World!',
   half: '50%',
-  var: 'value',
   who: 'fred',
   base: 'http://example.com/home/',
   path: '/foo/bar',
@@ -16,11 +14,9 @@ const context = {
     ['dot', '.'],
     ['comma', ','],
   ],
-  v: '6',
   x: '1024',
   y: '768',
   empty: '',
-  empty_keys: [],
   undef: undefined,
 } as const;
 
@@ -30,6 +26,8 @@ const context = {
 describe('simple string expansion', () => {
   test.each`
     template         | output
+    ${'{email}'}     | ${'john.doe%40example.com'}
+    ${'{url}'}       | ${'http%3A%2F%2Fexample.com%2Fhome%2F%3Fhello%3Dworld'}
     ${'{hello}'}     | ${'Hello%20World%21'}
     ${'{half}'}      | ${'50%25'}
     ${'O{empty}X'}   | ${'OX'}
@@ -52,6 +50,8 @@ describe('simple string expansion', () => {
 describe('form-style query expansion', () => {
   test.each`
     template          | output
+    ${'{?email}'}     | ${'?email=john.doe%40example.com'}
+    ${'{?url}'}       | ${'?url=http%3A%2F%2Fexample.com%2Fhome%2F%3Fhello%3Dworld'}
     ${'{?who}'}       | ${'?who=fred'}
     ${'{?half}'}      | ${'?half=50%25'}
     ${'{?empty}'}     | ${'?empty='}
@@ -72,6 +72,8 @@ describe('form-style query expansion', () => {
 describe('form-style query continuation', () => {
   test.each`
     template            | output
+    ${'{&email}'}       | ${'&email=john.doe%40example.com'}
+    ${'{&url}'}         | ${'&url=http%3A%2F%2Fexample.com%2Fhome%2F%3Fhello%3Dworld'}
     ${'{&who}'}         | ${'&who=fred'}
     ${'{&half}'}        | ${'&half=50%25'}
     ${'{&empty}'}       | ${'&empty='}

@@ -1,10 +1,10 @@
-import { Endpoint } from './utils/parseEndpoint';
+import { HTTPEndpoint } from './utils/parseHTTPEndpoint';
 
 export class HTTPError extends Error {
   response: Response;
-  endpoint: Endpoint;
+  endpoint: HTTPEndpoint;
 
-  constructor(endpoint: Endpoint, response: Response) {
+  constructor(endpoint: HTTPEndpoint, response: Response) {
     super(response.statusText || String(response.status));
     this.name = 'HTTPError';
     this.endpoint = endpoint;

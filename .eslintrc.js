@@ -34,6 +34,7 @@ module.exports = {
       rules: {
         quotes: 'off',
         '@typescript-eslint/no-namespace': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-unsafe-return': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',
