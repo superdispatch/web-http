@@ -6,6 +6,26 @@ const EXPRESSION_SEPARATOR_PATTERN = new RegExp(EXPRESSION_SEPARATOR, 'g');
 /** @link https://tools.ietf.org/html/rfc6570#section-2.4.2 */
 const EXPLODE_MODIFIER = '*';
 
+/** @link https://tools.ietf.org/html/rfc6570#section-2.4.1 */
+const MAX_LENGTH_PREFIX = ':';
+
+const ASSIGNMENT_SYMBOL = '=';
+
+/** @link https://tools.ietf.org/html/rfc6570#section-3.2.3 */
+const RESERVED_EXPANSION_OPERATOR = '+';
+
+/** @link https://tools.ietf.org/html/rfc6570#section-3.2.4 */
+const FRAGMENT_EXPANSION_OPERATOR = '#';
+
+/** @link https://tools.ietf.org/html/rfc6570#section-3.2.5 */
+const DOT_PREFIX_EXPANSION_OPERATOR = '.';
+
+/** @link https://tools.ietf.org/html/rfc6570#section-3.2.6 */
+const PATH_SEGMENT_EXPANSION_OPERATOR = '/';
+
+/** https://tools.ietf.org/html/rfc6570#section-3.2.7 */
+const PATH_STYLE_PARAMETER_EXPANSION_OPERATOR = ';';
+
 /** @link https://tools.ietf.org/html/rfc6570#section-3.2.8 */
 const FORM_STYLE_QUERY_EXPANSION_OPERATOR = '?';
 
@@ -13,64 +33,70 @@ const FORM_STYLE_QUERY_EXPANSION_OPERATOR = '?';
 const FORM_STYLE_QUERY_CONTINUATION_OPERATOR = '&';
 
 const FORM_STYLE_SEPARATOR = '&';
-const ASSIGNMENT_SYMBOL = '=';
 
 const EXPRESSION_OPERATORS = [
-  // Query component beginning with "?" and consisting of name=value pairs separated by "&"
+  RESERVED_EXPANSION_OPERATOR,
+  FRAGMENT_EXPANSION_OPERATOR,
+  DOT_PREFIX_EXPANSION_OPERATOR,
+  PATH_SEGMENT_EXPANSION_OPERATOR,
+  PATH_STYLE_PARAMETER_EXPANSION_OPERATOR,
   FORM_STYLE_QUERY_EXPANSION_OPERATOR,
-
-  // Continuation of query-style &name=value pairs within a literal query component
   FORM_STYLE_QUERY_CONTINUATION_OPERATOR,
 ];
-
-/** @link https://tools.ietf.org/html/rfc6570#section-2.2 */
-const EXPRESSION_OPERATOR_PATTERN = new RegExp(
-  [
-    '[',
-    ...EXPRESSION_OPERATORS,
-    // Reserved
-    '=,!@|',
-    ']',
-  ].join(''),
-  'g',
-);
 
 type Param = string | string[] | CompositeParam;
 type CompositeParam = Record<string, string>;
 
-function isCompositeParam(param: Param): param is CompositeParam {
+function isRecord(param: Param): param is CompositeParam {
   return (
     typeof param === 'object' &&
     Object.prototype.toString.call(param) === '[object Object]'
   );
 }
 
-function encode(param: Param): string {
-  if (typeof param === 'object') {
-    const values: string[] = [];
-
-    if (Array.isArray(param)) {
-      for (const value of param) {
-        values.push(encode(value));
-      }
-    } else {
-      for (const [key, value] of Object.entries(param)) {
-        values.push(encode(key), encode(value));
-      }
-    }
-
-    return values.join(EXPRESSION_SEPARATOR);
+function stringifyPrimitive(value: string, isEncoded: boolean): string {
+  if (isEncoded) {
+    value = encodeURI(value).replace(/%25([0-9A-F]{2})/gi, '%$1');
+  } else {
+    value = encodeURIComponent(value).replace(/!/g, '%21');
   }
 
-  return encodeURIComponent(param).replace(
-    EXPRESSION_OPERATOR_PATTERN,
-    (operator) => `%${operator.charCodeAt(0).toString(16)}`,
-  );
+  return value;
+}
+
+function stringifyParam(
+  param: Param,
+  separator = EXPRESSION_SEPARATOR,
+  isEncoded: boolean,
+): string {
+  if (typeof param !== 'object') {
+    return stringifyPrimitive(param, isEncoded);
+  }
+
+  const values: string[] = [];
+
+  if (Array.isArray(param)) {
+    for (const value of param) {
+      values.push(stringifyPrimitive(value, isEncoded));
+    }
+  } else {
+    for (const [key, value] of Object.entries(param)) {
+      values.push(key, stringifyPrimitive(value, isEncoded));
+    }
+  }
+
+  return values.join(separator);
+}
+
+interface Variable {
+  key: string;
+  maxLength: number;
+  isComposite: boolean;
 }
 
 function parseExpressionBlock(
   expressionBlock: string,
-): [operator: string, variables: string[]] {
+): [operator: string, variables: Variable[]] {
   const firstChar = expressionBlock.charAt(0);
   let operator = '';
 
@@ -79,74 +105,114 @@ function parseExpressionBlock(
     expressionBlock = expressionBlock.slice(1);
   }
 
-  return [operator, expressionBlock.split(EXPRESSION_SEPARATOR_PATTERN)];
-}
-
-function parseExpressionVariable(
-  variableExpression: string,
-): [variable: string, isComposite: boolean] {
-  const isComposite = variableExpression.endsWith(EXPLODE_MODIFIER);
-
   return [
-    isComposite ? variableExpression.slice(0, -1) : variableExpression,
-    isComposite,
+    operator,
+    expressionBlock.split(EXPRESSION_SEPARATOR_PATTERN).map(
+      (key): Variable => {
+        let isComposite = false;
+        let maxLength = Infinity;
+
+        if (key.endsWith(EXPLODE_MODIFIER)) {
+          isComposite = true;
+          key = key.slice(0, -1);
+        }
+
+        if (key.includes(MAX_LENGTH_PREFIX)) {
+          const chunks = key.split(MAX_LENGTH_PREFIX);
+
+          key = chunks[0];
+          maxLength = parseInt(chunks[1], 10);
+        }
+
+        return { key, maxLength, isComposite };
+      },
+    ),
   ];
 }
 
-function stringifyAssignment(key: string, value: Param) {
-  return encode(key) + ASSIGNMENT_SYMBOL + encode(value);
+function stringifyAssignment(
+  key: string,
+  value: Param,
+  isEncoded: boolean,
+  skipEmptyValue: boolean,
+) {
+  key = stringifyPrimitive(key, true);
+  value = stringifyParam(value, undefined, isEncoded);
+
+  if (skipEmptyValue && !value) {
+    return key;
+  }
+
+  return key + ASSIGNMENT_SYMBOL + value;
 }
 
 function stringifyCompositeParam(
-  separator: string,
   param: CompositeParam,
+  separator: string,
+  isEncoded: boolean,
+  skipEmptyValue: boolean,
 ): string {
-  return Object.keys(param)
-    .map((key) => encode(key) + ASSIGNMENT_SYMBOL + encode(param[key]))
+  return Object.entries(param)
+    .map(([key, value]) =>
+      stringifyAssignment(key, value, isEncoded, skipEmptyValue),
+    )
     .join(separator);
 }
 
 function forEachParam(
-  variables: string[],
+  variables: Variable[],
   params: URITemplateParams,
   fn: (variable: string, param: Param) => void,
 ) {
-  for (const variableExpression of variables) {
-    const [variable, isComposite] = parseExpressionVariable(variableExpression);
-    const param = params[variable] as null | Param;
+  for (const { key, maxLength, isComposite } of variables) {
+    let param = params[key] as null | Param;
 
-    if (param != null) {
-      if (isComposite && typeof param === 'object') {
-        if (Array.isArray(param)) {
-          for (const value of param) {
-            fn(variable, value);
-          }
-        } else {
-          fn(variable, param);
+    if (param == null) {
+      continue;
+    }
+
+    if (isRecord(param) && !isComposite) {
+      param = Object.entries(param).flat();
+    }
+
+    if (Array.isArray(param) && param.length === 0) {
+      continue;
+    }
+
+    if (typeof param === 'string' && Number.isInteger(maxLength)) {
+      param = param.slice(0, maxLength);
+    }
+
+    if (isComposite && typeof param === 'object') {
+      if (Array.isArray(param)) {
+        for (const value of param) {
+          fn(key, value);
         }
-      } else if (isCompositeParam(param)) {
-        fn(variable, Object.entries(param).flat());
       } else {
-        fn(variable, param);
+        fn(key, param);
       }
+    } else {
+      fn(key, param);
     }
   }
 }
 
 function stringifyFormStyleExpression(
-  operator: string,
-  variables: string[],
+  prefix: string,
+  separator: string,
+  variables: Variable[],
   params: URITemplateParams,
+  skipEmptyValue: boolean,
 ): string {
   const query: string[] = [];
 
   forEachParam(variables, params, (variable, param) => {
-    if (isCompositeParam(param)) {
+    if (isRecord(param)) {
       for (const [key, value] of Object.entries(param)) {
-        query.push(stringifyAssignment(key, value));
+        query.push(stringifyAssignment(key, value, false, skipEmptyValue));
       }
     } else {
-      query.push(stringifyAssignment(variable, param));
+      query.push(stringifyAssignment(variable, param, false, skipEmptyValue));
     }
   });
 
@@ -154,24 +220,31 @@ function stringifyFormStyleExpression(
     return '';
   }
 
-  return operator + query.join(FORM_STYLE_SEPARATOR);
+  return prefix + query.join(separator);
 }
 
 function stringifyExpression(
-  variables: string[],
+  prefix: string,
+  separator: string,
+  variables: Variable[],
   params: URITemplateParams,
+  isEncoded: boolean,
 ): string {
   const values: string[] = [];
 
   forEachParam(variables, params, (_, param) => {
-    if (isCompositeParam(param)) {
-      values.push(stringifyCompositeParam(EXPRESSION_SEPARATOR, param));
+    if (isRecord(param)) {
+      values.push(stringifyCompositeParam(param, separator, isEncoded, false));
     } else {
-      values.push(encode(param));
+      values.push(stringifyParam(param, undefined, isEncoded));
     }
   });
 
-  return values.join(EXPRESSION_SEPARATOR);
+  if (values.length === 0) {
+    return '';
+  }
+
+  return prefix + values.join(separator);
 }
 
 // Using `any` as a workaround for `Index signature is missing in type` error.
@@ -191,12 +264,61 @@ export function parseURITemplate<T extends URITemplateParams>(
       const [operator, variables] = parseExpressionBlock(expressionBlock);
 
       switch (operator) {
+        case RESERVED_EXPANSION_OPERATOR:
+          return stringifyExpression(
+            '',
+            EXPRESSION_SEPARATOR,
+            variables,
+            params,
+            true,
+          );
+
+        case FRAGMENT_EXPANSION_OPERATOR:
+          return stringifyExpression(
+            operator,
+            EXPRESSION_SEPARATOR,
+            variables,
+            params,
+            true,
+          );
+
+        case DOT_PREFIX_EXPANSION_OPERATOR:
+        case PATH_SEGMENT_EXPANSION_OPERATOR:
+          return stringifyExpression(
+            operator,
+            operator,
+            variables,
+            params,
+            false,
+          );
+
+        case PATH_STYLE_PARAMETER_EXPANSION_OPERATOR:
+          return stringifyFormStyleExpression(
+            operator,
+            operator,
+            variables,
+            params,
+            true,
+          );
+
         case FORM_STYLE_QUERY_EXPANSION_OPERATOR:
         case FORM_STYLE_QUERY_CONTINUATION_OPERATOR:
-          return stringifyFormStyleExpression(operator, variables, params);
+          return stringifyFormStyleExpression(
+            operator,
+            FORM_STYLE_SEPARATOR,
+            variables,
+            params,
+            false,
+          );
 
         default:
-          return stringifyExpression(variables, params);
+          return stringifyExpression(
+            '',
+            EXPRESSION_SEPARATOR,
+            variables,
+            params,
+            false,
+          );
       }
     },
   );

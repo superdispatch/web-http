@@ -86,7 +86,8 @@
     "prettier": "^2.1.2",
     "react": "^16.13.1",
     "react-test-renderer": "^16.13.1",
-    "typescript": "~4.0.0"
+    "typescript": "~4.0.0",
+    "uritemplate-test": "https://github.com/uri-templates/uritemplate-test#520fdd8b0f78779d12178c357a986e0e727f4bd0"
   },
   "engines": {
     "node": ">=10.0.0"
