@@ -18,6 +18,8 @@ export type HTTPResourceOptions<TData> = Omit<
   'fetcher' | 'suspense'
 >;
 
+export type HTTPResource<TData> = SWRResponseInterface<TData, Error>;
+
 export function useHTTPResource<
   TData,
   TParams extends URITemplateParams = URITemplateParams
@@ -25,7 +27,7 @@ export function useHTTPResource<
   input: null | HTTPResourceInput<TParams>,
   fetcher: HTTPResourceFetcher<TData>,
   { compare = deepEqual, ...options }: HTTPResourceOptions<TData> = {},
-): SWRResponseInterface<TData, Error> {
+): HTTPResource<TData> {
   const [key, template, params] = useDeepEqualMemo(
     () => {
       if (input == null) {
