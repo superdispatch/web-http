@@ -49,7 +49,7 @@ test.each([
   ['/users/{id}', { id: 1 }, { id: 2 }],
   ['POST /users/search', { body: 'foo' }, { body: 'bar' }],
   ['POST /users/search', { json: { name: 'foo' } }, { json: { name: 'bar' } }],
-])('dynamic key: %p [%p, %p]', async (template, params1, params2) => {
+])('dynamic key: %p [%p, %p]', async (template, params1: any, params2: any) => {
   const { result, rerender, waitForValueToChange } = renderHook(
     (params) =>
       useHTTPResource([template, params], fetcher, {
