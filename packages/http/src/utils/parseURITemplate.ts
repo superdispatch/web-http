@@ -1,8 +1,3 @@
-const EXPRESSION_BLOCK_PATTERN = /{(.*?)}/g;
-
-const EXPRESSION_SEPARATOR = ',';
-const EXPRESSION_SEPARATOR_PATTERN = new RegExp(EXPRESSION_SEPARATOR, 'g');
-
 /** @link https://tools.ietf.org/html/rfc6570#section-2.4.2 */
 const EXPLODE_MODIFIER = '*';
 
@@ -42,7 +37,22 @@ const EXPRESSION_OPERATORS = [
   PATH_STYLE_PARAMETER_EXPANSION_OPERATOR,
   FORM_STYLE_QUERY_EXPANSION_OPERATOR,
   FORM_STYLE_QUERY_CONTINUATION_OPERATOR,
-];
+] as const;
+
+type Operator = typeof EXPRESSION_OPERATORS[number];
+
+const EXPRESSION_BLOCK_PATTERN = /{(.*?)}/g;
+const EXPRESSION_BLOCK_ITEMS_PATTERN = new RegExp(
+  [
+    // Begins with optional operator.
+    `^([${EXPRESSION_OPERATORS.join('')}])?`,
+    // Everything else
+    '(.+)',
+  ].join(''),
+);
+
+const EXPRESSION_SEPARATOR = ',';
+const EXPRESSION_SEPARATOR_PATTERN = new RegExp(EXPRESSION_SEPARATOR, 'g');
 
 type Param = string | string[] | CompositeParam;
 type CompositeParam = Record<string, string>;
@@ -94,40 +104,45 @@ interface Variable {
   isComposite: boolean;
 }
 
-function parseExpressionBlock(
-  expressionBlock: string,
-): [operator: string, variables: Variable[]] {
-  const firstChar = expressionBlock.charAt(0);
-  let operator = '';
+interface ExpressionBlock {
+  operator?: Operator;
+  variables: Variable[];
+}
 
-  if (EXPRESSION_OPERATORS.includes(firstChar)) {
-    operator = firstChar;
-    expressionBlock = expressionBlock.slice(1);
+function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
+  const matches = EXPRESSION_BLOCK_ITEMS_PATTERN.exec(expressionBlock);
+  let operator: undefined | Operator;
+
+  if (matches) {
+    if (matches[1]) {
+      operator = matches[1] as Operator;
+    }
+
+    expressionBlock = matches[2];
   }
 
-  return [
-    operator,
-    expressionBlock.split(EXPRESSION_SEPARATOR_PATTERN).map(
-      (key): Variable => {
-        let isComposite = false;
-        let maxLength = Infinity;
+  const variables = expressionBlock.split(EXPRESSION_SEPARATOR_PATTERN).map(
+    (key): Variable => {
+      let isComposite = false;
+      let maxLength = Infinity;
 
-        if (key.endsWith(EXPLODE_MODIFIER)) {
-          isComposite = true;
-          key = key.slice(0, -1);
-        }
+      if (key.endsWith(EXPLODE_MODIFIER)) {
+        isComposite = true;
+        key = key.slice(0, -1);
+      }
 
-        if (key.includes(MAX_LENGTH_PREFIX)) {
-          const chunks = key.split(MAX_LENGTH_PREFIX);
+      if (key.includes(MAX_LENGTH_PREFIX)) {
+        const chunks = key.split(MAX_LENGTH_PREFIX);
 
-          key = chunks[0];
-          maxLength = parseInt(chunks[1], 10);
-        }
+        key = chunks[0];
+        maxLength = parseInt(chunks[1], 10);
+      }
 
-        return { key, maxLength, isComposite };
-      },
-    ),
-  ];
+      return { key, maxLength, isComposite };
+    },
+  );
+
+  return { operator, variables };
 }
 
 function stringifyAssignment(
@@ -261,7 +276,7 @@ export function parseURITemplate<T extends URITemplateParams>(
   return template.replace(
     EXPRESSION_BLOCK_PATTERN,
     (_, expressionBlock: string) => {
-      const [operator, variables] = parseExpressionBlock(expressionBlock);
+      const { operator, variables } = parseExpressionBlock(expressionBlock);
 
       switch (operator) {
         case RESERVED_EXPANSION_OPERATOR:
