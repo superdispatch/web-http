@@ -75,40 +75,6 @@ function flattenCompositeParam(param: CompositeParam): ListParam {
   return Object.entries(param).flat();
 }
 
-function stringifyPrimitive2(value: string, isEncoded: boolean): string {
-  if (isEncoded) {
-    value = encodeURI(value).replace(/%25([0-9A-F]{2})/gi, '%$1');
-  } else {
-    value = encodeURIComponent(value).replace(/!/g, '%21');
-  }
-
-  return value;
-}
-
-function stringifyParam1(
-  param: Param,
-  separator = EXPRESSION_SEPARATOR,
-  isEncoded: boolean,
-): string {
-  if (typeof param !== 'object') {
-    return stringifyPrimitive2(param, isEncoded);
-  }
-
-  const values: string[] = [];
-
-  if (Array.isArray(param)) {
-    for (const value of param) {
-      values.push(stringifyPrimitive2(value, isEncoded));
-    }
-  } else {
-    for (const [key, value] of Object.entries(param)) {
-      values.push(key, stringifyPrimitive2(value, isEncoded));
-    }
-  }
-
-  return values.join(separator);
-}
-
 interface Variable {
   key: string;
   maxLength: number;
@@ -151,86 +117,6 @@ function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
   );
 
   return { variables, operator: (operator || undefined) as Operator };
-}
-
-function stringifyAssignment1(
-  key: string,
-  value: Param,
-  isEncoded: boolean,
-  skipEmptyValue: boolean,
-) {
-  key = stringifyPrimitive2(key, true);
-  value = stringifyParam1(value, undefined, isEncoded);
-
-  if (skipEmptyValue && !value) {
-    return key;
-  }
-
-  return key + ASSIGNMENT_SYMBOL + value;
-}
-
-function forEachParam(
-  variables: Variable[],
-  params: URITemplateParams,
-  fn: (variable: string, param: Param) => void,
-) {
-  for (const { key, maxLength, isComposite } of variables) {
-    let param = params[key] as null | Param;
-
-    if (param == null) {
-      continue;
-    }
-
-    if (isCompositeParam(param) && !isComposite) {
-      param = flattenCompositeParam(param);
-    }
-
-    if (Array.isArray(param) && param.length === 0) {
-      continue;
-    }
-
-    if (typeof param === 'string' && Number.isInteger(maxLength)) {
-      param = param.slice(0, maxLength);
-    }
-
-    if (isComposite && typeof param === 'object') {
-      if (Array.isArray(param)) {
-        for (const value of param) {
-          fn(key, value);
-        }
-      } else {
-        fn(key, param);
-      }
-    } else {
-      fn(key, param);
-    }
-  }
-}
-
-function stringifyFormStyleExpression(
-  prefix: string,
-  separator: string,
-  variables: Variable[],
-  params: URITemplateParams,
-  skipEmptyValue: boolean,
-): string {
-  const query: string[] = [];
-
-  forEachParam(variables, params, (variable, param) => {
-    if (isCompositeParam(param)) {
-      for (const [key, value] of Object.entries(param)) {
-        query.push(stringifyAssignment1(key, value, false, skipEmptyValue));
-      }
-    } else {
-      query.push(stringifyAssignment1(variable, param, false, skipEmptyValue));
-    }
-  });
-
-  if (query.length === 0) {
-    return '';
-  }
-
-  return prefix + query.join(separator);
 }
 
 // Using `any` as a workaround for `Index signature is missing in type` error.
@@ -278,14 +164,19 @@ interface StringifyAssignmentOptions extends StringifyListOptions {
 function stringifyAssignment(
   key: string,
   value: string | ListParam,
-  { skipEmptyValues, separator, skipEncoding }: StringifyAssignmentOptions,
-): string {
-  let result = stringifyPrimitive(key);
+  {
+    separator,
+    skipEncoding,
 
-  if (typeof value === 'string') {
-    value = stringifyPrimitive(value, { skipEncoding });
-  } else {
+    skipEmptyValues,
+  }: StringifyAssignmentOptions,
+): string {
+  let result = stringifyPrimitive(key, { skipEncoding: true });
+
+  if (Array.isArray(value)) {
     value = stringifyList(value, { separator, skipEncoding });
+  } else {
+    value = stringifyPrimitive(value, { skipEncoding });
   }
 
   if (value || !skipEmptyValues) {
@@ -310,23 +201,43 @@ function stringifyCompositeParam(
     .join(separator);
 }
 
+interface StringifyVariableOptions extends StringifyAssignmentOptions {
+  withAssignment?: boolean;
+}
+
 function stringifyVariable(
   param: null | Param,
-  { maxLength, isComposite }: Variable,
-  { separator, skipEncoding, skipEmptyValues }: StringifyAssignmentOptions,
+  { key, maxLength, isComposite }: Variable,
+  {
+    separator,
+    skipEncoding,
+    withAssignment,
+    skipEmptyValues,
+  }: StringifyVariableOptions,
 ): null | string {
   // Skip undefined values.
   if (param == null) {
     return null;
   }
 
-  // Truncate string values with max length.
-  if (typeof param === 'string' && Number.isInteger(maxLength)) {
-    param = param.slice(0, maxLength);
-  }
-
   if (isCompositeParam(param)) {
     if (isComposite) {
+      if (withAssignment) {
+        const entries = Object.entries(param).map(([prop, value]) =>
+          stringifyAssignment(prop, value, {
+            separator,
+            skipEncoding,
+            skipEmptyValues,
+          }),
+        );
+
+        if (entries.length === 0) {
+          return null;
+        }
+
+        return entries.join(separator);
+      }
+
       return stringifyCompositeParam(param, {
         separator,
         skipEncoding,
@@ -343,17 +254,43 @@ function stringifyVariable(
       return null;
     }
 
-    if (isComposite) {
-      return stringifyList(param, { separator, skipEncoding });
+    const listSeparator = isComposite ? separator : undefined;
+
+    if (withAssignment) {
+      if (isComposite) {
+        return param
+          .map((value) =>
+            stringifyAssignment(key, value, { skipEncoding, skipEmptyValues }),
+          )
+          .join(separator);
+      }
+
+      return stringifyAssignment(key, param, {
+        skipEncoding,
+        skipEmptyValues,
+        separator: listSeparator,
+      });
     }
 
-    return stringifyList(param, { skipEncoding });
+    return stringifyList(param, {
+      skipEncoding,
+      separator: isComposite ? separator : undefined,
+    });
+  }
+
+  // Truncate string values with max length.
+  if (Number.isInteger(maxLength)) {
+    param = param.slice(0, maxLength);
+  }
+
+  if (withAssignment) {
+    return stringifyAssignment(key, param, { skipEncoding, skipEmptyValues });
   }
 
   return stringifyPrimitive(param, { skipEncoding });
 }
 
-interface StringifyExpressionBlockOptions extends StringifyAssignmentOptions {
+interface StringifyExpressionBlockOptions extends StringifyVariableOptions {
   prefix?: string;
 }
 
@@ -364,6 +301,7 @@ function stringifyExpressionBlock(
     prefix = '',
     separator,
     skipEncoding,
+    withAssignment,
     skipEmptyValues,
   }: StringifyExpressionBlockOptions = {},
 ) {
@@ -373,6 +311,7 @@ function stringifyExpressionBlock(
     const value = stringifyVariable(params[variable.key], variable, {
       separator,
       skipEncoding,
+      withAssignment,
       skipEmptyValues,
     });
 
@@ -422,24 +361,23 @@ export function parseURITemplate<T extends URITemplateParams>(
           break;
         }
 
-        case PATH_STYLE_PARAMETER_EXPANSION_OPERATOR:
-          return stringifyFormStyleExpression(
-            operator,
-            operator,
-            variables,
-            params,
-            true,
-          );
+        case PATH_STYLE_PARAMETER_EXPANSION_OPERATOR: {
+          options.prefix = operator;
+          options.separator = operator;
+          options.withAssignment = true;
+          options.skipEmptyValues = true;
+
+          break;
+        }
 
         case FORM_STYLE_QUERY_EXPANSION_OPERATOR:
-        case FORM_STYLE_QUERY_CONTINUATION_OPERATOR:
-          return stringifyFormStyleExpression(
-            operator,
-            FORM_STYLE_SEPARATOR,
-            variables,
-            params,
-            false,
-          );
+        case FORM_STYLE_QUERY_CONTINUATION_OPERATOR: {
+          options.prefix = operator;
+          options.separator = FORM_STYLE_SEPARATOR;
+          options.withAssignment = true;
+
+          break;
+        }
       }
 
       return stringifyExpressionBlock(params, variables, options);
