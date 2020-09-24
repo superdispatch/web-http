@@ -9,8 +9,12 @@ module.exports = (api) => {
         '@superdispatch/babel-preset',
         {
           jsx: false,
+          loose: true,
           targets: 'esmodules',
-          optimize: { react: false, pureCalls: true },
+          optimize: {
+            react: false,
+            pureCalls: true,
+          },
         },
       ],
     ],
