@@ -1,68 +1,23 @@
-const ASSIGNMENT_SYMBOL = '=';
+type Operator =
+  /** @link https://tools.ietf.org/html/rfc6570#section-3.2.3 */
+  | '+'
+  /** @link https://tools.ietf.org/html/rfc6570#section-3.2.4 */
+  | '#'
+  /** @link https://tools.ietf.org/html/rfc6570#section-3.2.5 */
+  | '.'
+  /** @link https://tools.ietf.org/html/rfc6570#section-3.2.6 */
+  | '/'
+  /** @link https://tools.ietf.org/html/rfc6570#section-3.2.7 */
+  | ';'
+  /** @link https://tools.ietf.org/html/rfc6570#section-3.2.8 */
+  | '?'
+  /** @link https://tools.ietf.org/html/rfc6570#section-3.2.9 */
+  | '&';
 
-/** @link https://tools.ietf.org/html/rfc6570#section-3.2.3 */
-const RESERVED_EXPANSION_OPERATOR = '+';
-
-/** @link https://tools.ietf.org/html/rfc6570#section-3.2.4 */
-const FRAGMENT_EXPANSION_OPERATOR = '#';
-
-/** @link https://tools.ietf.org/html/rfc6570#section-3.2.5 */
-const DOT_PREFIX_EXPANSION_OPERATOR = '.';
-
-/** @link https://tools.ietf.org/html/rfc6570#section-3.2.6 */
-const PATH_SEGMENT_EXPANSION_OPERATOR = '/';
-
-/** https://tools.ietf.org/html/rfc6570#section-3.2.7 */
-const PATH_STYLE_PARAMETER_EXPANSION_OPERATOR = ';';
-
-/** @link https://tools.ietf.org/html/rfc6570#section-3.2.8 */
-const FORM_STYLE_QUERY_EXPANSION_OPERATOR = '?';
-
-/** @link https://tools.ietf.org/html/rfc6570#section-3.2.9 */
-const FORM_STYLE_QUERY_CONTINUATION_OPERATOR = '&';
-
-const FORM_STYLE_SEPARATOR = '&';
-
-const EXPRESSION_OPERATORS = [
-  RESERVED_EXPANSION_OPERATOR,
-  FRAGMENT_EXPANSION_OPERATOR,
-  DOT_PREFIX_EXPANSION_OPERATOR,
-  PATH_SEGMENT_EXPANSION_OPERATOR,
-  PATH_STYLE_PARAMETER_EXPANSION_OPERATOR,
-  FORM_STYLE_QUERY_EXPANSION_OPERATOR,
-  FORM_STYLE_QUERY_CONTINUATION_OPERATOR,
-] as const;
-
-type Operator = typeof EXPRESSION_OPERATORS[number];
-
-const EXPRESSION_BLOCK_PATTERN = /{(.*?)}/g;
-const EXPRESSION_BLOCK_ITEMS_PATTERN = new RegExp(
-  [
-    // Begins with optional operator.
-    `^([${EXPRESSION_OPERATORS.join('')}])`,
-    // Everything else
-    '(.+)',
-  ].join(''),
-);
-
-const EXPRESSION_SEPARATOR = ',';
-const EXPRESSION_SEPARATOR_PATTERN = new RegExp(EXPRESSION_SEPARATOR, 'g');
-
-const VARIABLE_PATTERN = new RegExp(
-  // Everything at the beginning
-  '(.+)' +
-    '(' +
-    /** @link https://tools.ietf.org/html/rfc6570#section-2.4.2 */
-    '(\\*)$' +
-    '|' +
-    /** @link https://tools.ietf.org/html/rfc6570#section-2.4.1 */
-    '(:(\\d+))' +
-    ')$',
-);
-
-type ListParam = string[];
-type CompositeParam = Record<string, string>;
-type Param = string | ListParam | CompositeParam;
+type PrimitiveParam = number | string;
+type ListParam = PrimitiveParam[];
+type CompositeParam = Record<string, PrimitiveParam>;
+type Param = PrimitiveParam | ListParam | CompositeParam;
 
 function isCompositeParam(param: Param): param is CompositeParam {
   return (
@@ -87,7 +42,7 @@ interface ExpressionBlock {
 }
 
 function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
-  const operatorMatch = EXPRESSION_BLOCK_ITEMS_PATTERN.exec(expressionBlock);
+  const operatorMatch = /^([+#./;?&])(.+)/.exec(expressionBlock);
   let operator = '';
 
   if (operatorMatch) {
@@ -95,12 +50,17 @@ function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
     expressionBlock = operatorMatch[2];
   }
 
-  const variables = expressionBlock.split(EXPRESSION_SEPARATOR_PATTERN).map(
+  const variables = expressionBlock.split(/,/g).map(
     (key): Variable => {
       let maxLength = NaN;
       let isComposite = false;
 
-      const variableMatches = VARIABLE_PATTERN.exec(key);
+      const variableMatches =
+        /**
+         * @link https://tools.ietf.org/html/rfc6570#section-2.4.1
+         * @link https://tools.ietf.org/html/rfc6570#section-2.4.2
+         */
+        /(.+)((\*)|(:(\d+)))$/.exec(key);
 
       if (variableMatches) {
         key = variableMatches[1];
@@ -125,9 +85,11 @@ interface StringifyPrimitiveOptions {
 }
 
 function stringifyPrimitive(
-  value: string,
+  value: PrimitiveParam,
   { skipEncoding }: StringifyPrimitiveOptions,
 ) {
+  value = String(value);
+
   if (skipEncoding) {
     value = encodeURI(value)
       // Rollback double encoding.
@@ -160,7 +122,7 @@ interface StringifyAssignmentOptions extends StringifyListOptions {
 
 function stringifyAssignment(
   key: string,
-  value: string | ListParam,
+  value: PrimitiveParam | ListParam,
   {
     separator,
     skipEncoding,
@@ -177,7 +139,7 @@ function stringifyAssignment(
   }
 
   if (value || !skipEmptyValues) {
-    result += ASSIGNMENT_SYMBOL + value;
+    result += `=${value}`;
   }
 
   return result;
@@ -276,7 +238,7 @@ function stringifyVariable(
   }
 
   // Truncate string values with max length.
-  if (Number.isInteger(maxLength)) {
+  if (typeof param === 'string' && Number.isInteger(maxLength)) {
     param = param.slice(0, maxLength);
   }
 
@@ -325,40 +287,42 @@ function stringifyExpressionBlock(
 }
 
 /**
- * Based on https://tools.ietf.org/html/rfc6570
+ * @link https://tools.ietf.org/html/rfc6570
  */
 export function parseURITemplate<T extends URITemplateParams>(
   template: string,
   params: T,
 ): string {
   return template.replace(
-    EXPRESSION_BLOCK_PATTERN,
+    // Extract all values within `{…}` blocks
+    /{(.*?)}/g,
     (_, expressionBlock: string) => {
       const { operator, variables } = parseExpressionBlock(expressionBlock);
       const options: StringifyExpressionBlockOptions = {};
 
       switch (operator) {
-        case RESERVED_EXPANSION_OPERATOR: {
+        case '+': {
           options.prefix = '';
           options.skipEncoding = true;
           break;
         }
 
-        case FRAGMENT_EXPANSION_OPERATOR: {
+        case '#': {
           options.prefix = operator;
           options.skipEncoding = true;
 
           break;
         }
-        case DOT_PREFIX_EXPANSION_OPERATOR:
-        case PATH_SEGMENT_EXPANSION_OPERATOR: {
+
+        case '.':
+        case '/': {
           options.prefix = operator;
           options.separator = operator;
 
           break;
         }
 
-        case PATH_STYLE_PARAMETER_EXPANSION_OPERATOR: {
+        case ';': {
           options.prefix = operator;
           options.separator = operator;
           options.withAssignment = true;
@@ -367,10 +331,10 @@ export function parseURITemplate<T extends URITemplateParams>(
           break;
         }
 
-        case FORM_STYLE_QUERY_EXPANSION_OPERATOR:
-        case FORM_STYLE_QUERY_CONTINUATION_OPERATOR: {
+        case '?':
+        case '&': {
+          options.separator = '&';
           options.prefix = operator;
-          options.separator = FORM_STYLE_SEPARATOR;
           options.withAssignment = true;
 
           break;
