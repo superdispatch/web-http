@@ -111,14 +111,10 @@ interface ExpressionBlock {
 
 function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
   const matches = EXPRESSION_BLOCK_ITEMS_PATTERN.exec(expressionBlock);
-  let operator: undefined | Operator;
+  let operator = '';
 
   if (matches) {
-    if (matches[1]) {
-      operator = matches[1] as Operator;
-    }
-
-    expressionBlock = matches[2];
+    [, operator, expressionBlock] = matches;
   }
 
   const variables = expressionBlock.split(EXPRESSION_SEPARATOR_PATTERN).map(
@@ -142,7 +138,7 @@ function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
     },
   );
 
-  return { operator, variables };
+  return { variables, operator: (operator || undefined) as Operator };
 }
 
 function stringifyAssignment(
