@@ -60,17 +60,22 @@ const VARIABLE_PATTERN = new RegExp(
     ')$',
 );
 
-type Param = string | string[] | CompositeParam;
+type ListParam = string[];
 type CompositeParam = Record<string, string>;
+type Param = string | ListParam | CompositeParam;
 
-function isRecord(param: Param): param is CompositeParam {
+function isCompositeParam(param: Param): param is CompositeParam {
   return (
     typeof param === 'object' &&
     Object.prototype.toString.call(param) === '[object Object]'
   );
 }
 
-function stringifyPrimitive(value: string, isEncoded: boolean): string {
+function flattenCompositeParam(param: CompositeParam): ListParam {
+  return Object.entries(param).flat();
+}
+
+function stringifyPrimitive2(value: string, isEncoded: boolean): string {
   if (isEncoded) {
     value = encodeURI(value).replace(/%25([0-9A-F]{2})/gi, '%$1');
   } else {
@@ -80,24 +85,24 @@ function stringifyPrimitive(value: string, isEncoded: boolean): string {
   return value;
 }
 
-function stringifyParam(
+function stringifyParam1(
   param: Param,
   separator = EXPRESSION_SEPARATOR,
   isEncoded: boolean,
 ): string {
   if (typeof param !== 'object') {
-    return stringifyPrimitive(param, isEncoded);
+    return stringifyPrimitive2(param, isEncoded);
   }
 
   const values: string[] = [];
 
   if (Array.isArray(param)) {
     for (const value of param) {
-      values.push(stringifyPrimitive(value, isEncoded));
+      values.push(stringifyPrimitive2(value, isEncoded));
     }
   } else {
     for (const [key, value] of Object.entries(param)) {
-      values.push(key, stringifyPrimitive(value, isEncoded));
+      values.push(key, stringifyPrimitive2(value, isEncoded));
     }
   }
 
@@ -148,33 +153,20 @@ function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
   return { variables, operator: (operator || undefined) as Operator };
 }
 
-function stringifyAssignment(
+function stringifyAssignment1(
   key: string,
   value: Param,
   isEncoded: boolean,
   skipEmptyValue: boolean,
 ) {
-  key = stringifyPrimitive(key, true);
-  value = stringifyParam(value, undefined, isEncoded);
+  key = stringifyPrimitive2(key, true);
+  value = stringifyParam1(value, undefined, isEncoded);
 
   if (skipEmptyValue && !value) {
     return key;
   }
 
   return key + ASSIGNMENT_SYMBOL + value;
-}
-
-function stringifyCompositeParam(
-  param: CompositeParam,
-  separator: string,
-  isEncoded: boolean,
-  skipEmptyValue: boolean,
-): string {
-  return Object.entries(param)
-    .map(([key, value]) =>
-      stringifyAssignment(key, value, isEncoded, skipEmptyValue),
-    )
-    .join(separator);
 }
 
 function forEachParam(
@@ -189,8 +181,8 @@ function forEachParam(
       continue;
     }
 
-    if (isRecord(param) && !isComposite) {
-      param = Object.entries(param).flat();
+    if (isCompositeParam(param) && !isComposite) {
+      param = flattenCompositeParam(param);
     }
 
     if (Array.isArray(param) && param.length === 0) {
@@ -225,12 +217,12 @@ function stringifyFormStyleExpression(
   const query: string[] = [];
 
   forEachParam(variables, params, (variable, param) => {
-    if (isRecord(param)) {
+    if (isCompositeParam(param)) {
       for (const [key, value] of Object.entries(param)) {
-        query.push(stringifyAssignment(key, value, false, skipEmptyValue));
+        query.push(stringifyAssignment1(key, value, false, skipEmptyValue));
       }
     } else {
-      query.push(stringifyAssignment(variable, param, false, skipEmptyValue));
+      query.push(stringifyAssignment1(variable, param, false, skipEmptyValue));
     }
   });
 
@@ -241,22 +233,153 @@ function stringifyFormStyleExpression(
   return prefix + query.join(separator);
 }
 
-function stringifyExpression(
-  prefix: string,
-  separator: string,
-  variables: Variable[],
-  params: URITemplateParams,
-  isEncoded: boolean,
+// Using `any` as a workaround for `Index signature is missing in type` error.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type URITemplateParams = Record<string, any>;
+
+interface StringifyPrimitiveOptions {
+  skipEncoding?: boolean;
+}
+
+function stringifyPrimitive(
+  value: string,
+  { skipEncoding }: StringifyPrimitiveOptions = {},
+) {
+  if (skipEncoding) {
+    value = encodeURI(value)
+      // Rollback double encoding.
+      .replace(/%25([0-9A-F]{2})/gi, '%$1');
+  } else {
+    value = encodeURIComponent(value)
+      // Encode exclamation sign.
+      .replace(/!/g, '%21');
+  }
+
+  return value;
+}
+
+interface StringifyListOptions extends StringifyPrimitiveOptions {
+  separator?: string;
+}
+
+function stringifyList(
+  param: ListParam,
+  { separator, ...options }: StringifyListOptions,
 ): string {
+  return param
+    .map((value) => stringifyPrimitive(value, options))
+    .join(separator);
+}
+
+interface StringifyAssignmentOptions extends StringifyListOptions {
+  skipEmptyValues?: boolean;
+}
+
+function stringifyAssignment(
+  key: string,
+  value: string | ListParam,
+  { skipEmptyValues, separator, skipEncoding }: StringifyAssignmentOptions,
+): string {
+  let result = stringifyPrimitive(key);
+
+  if (typeof value === 'string') {
+    value = stringifyPrimitive(value, { skipEncoding });
+  } else {
+    value = stringifyList(value, { separator, skipEncoding });
+  }
+
+  if (value || !skipEmptyValues) {
+    result += ASSIGNMENT_SYMBOL + value;
+  }
+
+  return result;
+}
+
+function stringifyCompositeParam(
+  param: CompositeParam,
+  { separator, skipEncoding, skipEmptyValues }: StringifyAssignmentOptions,
+): string {
+  return Object.entries(param)
+    .map(([key, value]) =>
+      stringifyAssignment(key, value, {
+        separator,
+        skipEncoding,
+        skipEmptyValues,
+      }),
+    )
+    .join(separator);
+}
+
+function stringifyVariable(
+  param: null | Param,
+  { maxLength, isComposite }: Variable,
+  { separator, skipEncoding, skipEmptyValues }: StringifyAssignmentOptions,
+): null | string {
+  // Skip undefined values.
+  if (param == null) {
+    return null;
+  }
+
+  // Truncate string values with max length.
+  if (typeof param === 'string' && Number.isInteger(maxLength)) {
+    param = param.slice(0, maxLength);
+  }
+
+  if (isCompositeParam(param)) {
+    if (isComposite) {
+      return stringifyCompositeParam(param, {
+        separator,
+        skipEncoding,
+        skipEmptyValues,
+      });
+    }
+
+    param = flattenCompositeParam(param);
+  }
+
+  if (Array.isArray(param)) {
+    // Skip empty arrays.
+    if (param.length === 0) {
+      return null;
+    }
+
+    if (isComposite) {
+      return stringifyList(param, { separator, skipEncoding });
+    }
+
+    return stringifyList(param, { skipEncoding });
+  }
+
+  return stringifyPrimitive(param, { skipEncoding });
+}
+
+interface StringifyExpressionBlockOptions extends StringifyAssignmentOptions {
+  prefix?: string;
+}
+
+function stringifyExpressionBlock(
+  params: URITemplateParams,
+  variables: Variable[],
+  {
+    prefix = '',
+    separator,
+    skipEncoding,
+    skipEmptyValues,
+  }: StringifyExpressionBlockOptions = {},
+) {
   const values: string[] = [];
 
-  forEachParam(variables, params, (_, param) => {
-    if (isRecord(param)) {
-      values.push(stringifyCompositeParam(param, separator, isEncoded, false));
-    } else {
-      values.push(stringifyParam(param, undefined, isEncoded));
+  for (const variable of variables) {
+    const value = stringifyVariable(params[variable.key], variable, {
+      separator,
+      skipEncoding,
+      skipEmptyValues,
+    });
+
+    if (value != null) {
+      values.push(value);
     }
-  });
+  }
 
   if (values.length === 0) {
     return '';
@@ -264,10 +387,6 @@ function stringifyExpression(
 
   return prefix + values.join(separator);
 }
-
-// Using `any` as a workaround for `Index signature is missing in type` error.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type URITemplateParams = Record<string, any>;
 
 /**
  * Based on https://tools.ietf.org/html/rfc6570
@@ -280,35 +399,28 @@ export function parseURITemplate<T extends URITemplateParams>(
     EXPRESSION_BLOCK_PATTERN,
     (_, expressionBlock: string) => {
       const { operator, variables } = parseExpressionBlock(expressionBlock);
+      const options: StringifyExpressionBlockOptions = {};
 
       switch (operator) {
-        case RESERVED_EXPANSION_OPERATOR:
-          return stringifyExpression(
-            '',
-            EXPRESSION_SEPARATOR,
-            variables,
-            params,
-            true,
-          );
+        case RESERVED_EXPANSION_OPERATOR: {
+          options.prefix = '';
+          options.skipEncoding = true;
+          break;
+        }
 
-        case FRAGMENT_EXPANSION_OPERATOR:
-          return stringifyExpression(
-            operator,
-            EXPRESSION_SEPARATOR,
-            variables,
-            params,
-            true,
-          );
+        case FRAGMENT_EXPANSION_OPERATOR: {
+          options.prefix = operator;
+          options.skipEncoding = true;
 
+          break;
+        }
         case DOT_PREFIX_EXPANSION_OPERATOR:
-        case PATH_SEGMENT_EXPANSION_OPERATOR:
-          return stringifyExpression(
-            operator,
-            operator,
-            variables,
-            params,
-            false,
-          );
+        case PATH_SEGMENT_EXPANSION_OPERATOR: {
+          options.prefix = operator;
+          options.separator = operator;
+
+          break;
+        }
 
         case PATH_STYLE_PARAMETER_EXPANSION_OPERATOR:
           return stringifyFormStyleExpression(
@@ -328,16 +440,9 @@ export function parseURITemplate<T extends URITemplateParams>(
             params,
             false,
           );
-
-        default:
-          return stringifyExpression(
-            '',
-            EXPRESSION_SEPARATOR,
-            variables,
-            params,
-            false,
-          );
       }
+
+      return stringifyExpressionBlock(params, variables, options);
     },
   );
 }
