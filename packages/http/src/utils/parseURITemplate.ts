@@ -1,9 +1,3 @@
-/** @link https://tools.ietf.org/html/rfc6570#section-2.4.2 */
-const EXPLODE_MODIFIER = '*';
-
-/** @link https://tools.ietf.org/html/rfc6570#section-2.4.1 */
-const MAX_LENGTH_PREFIX = ':';
-
 const ASSIGNMENT_SYMBOL = '=';
 
 /** @link https://tools.ietf.org/html/rfc6570#section-3.2.3 */
@@ -53,6 +47,18 @@ const EXPRESSION_BLOCK_ITEMS_PATTERN = new RegExp(
 
 const EXPRESSION_SEPARATOR = ',';
 const EXPRESSION_SEPARATOR_PATTERN = new RegExp(EXPRESSION_SEPARATOR, 'g');
+
+const VARIABLE_PATTERN = new RegExp(
+  // Everything at the beginning
+  '(.+)' +
+    '(' +
+    /** @link https://tools.ietf.org/html/rfc6570#section-2.4.2 */
+    '(\\*)$' +
+    '|' +
+    /** @link https://tools.ietf.org/html/rfc6570#section-2.4.1 */
+    '(:(\\d+))' +
+    ')$',
+);
 
 type Param = string | string[] | CompositeParam;
 type CompositeParam = Record<string, string>;
@@ -114,7 +120,8 @@ function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
   let operator = '';
 
   if (matches) {
-    [, operator, expressionBlock] = matches;
+    operator = matches[1];
+    expressionBlock = matches[2];
   }
 
   const variables = expressionBlock.split(EXPRESSION_SEPARATOR_PATTERN).map(
@@ -122,16 +129,16 @@ function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
       let isComposite = false;
       let maxLength = Infinity;
 
-      if (key.endsWith(EXPLODE_MODIFIER)) {
-        isComposite = true;
-        key = key.slice(0, -1);
-      }
+      const variableMatches = VARIABLE_PATTERN.exec(key);
 
-      if (key.includes(MAX_LENGTH_PREFIX)) {
-        const chunks = key.split(MAX_LENGTH_PREFIX);
+      if (variableMatches) {
+        key = variableMatches[1];
 
-        key = chunks[0];
-        maxLength = parseInt(chunks[1], 10);
+        if (variableMatches[3]) {
+          isComposite = true;
+        } else if (variableMatches[5]) {
+          maxLength = parseInt(variableMatches[5], 10);
+        }
       }
 
       return { key, maxLength, isComposite };
