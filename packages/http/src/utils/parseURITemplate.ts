@@ -39,7 +39,7 @@ const EXPRESSION_BLOCK_PATTERN = /{(.*?)}/g;
 const EXPRESSION_BLOCK_ITEMS_PATTERN = new RegExp(
   [
     // Begins with optional operator.
-    `^([${EXPRESSION_OPERATORS.join('')}])?`,
+    `^([${EXPRESSION_OPERATORS.join('')}])`,
     // Everything else
     '(.+)',
   ].join(''),
@@ -87,29 +87,26 @@ interface ExpressionBlock {
 }
 
 function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
-  const matches = EXPRESSION_BLOCK_ITEMS_PATTERN.exec(expressionBlock);
+  const operatorMatch = EXPRESSION_BLOCK_ITEMS_PATTERN.exec(expressionBlock);
   let operator = '';
 
-  if (matches) {
-    operator = matches[1];
-    expressionBlock = matches[2];
+  if (operatorMatch) {
+    operator = operatorMatch[1];
+    expressionBlock = operatorMatch[2];
   }
 
   const variables = expressionBlock.split(EXPRESSION_SEPARATOR_PATTERN).map(
     (key): Variable => {
+      let maxLength = NaN;
       let isComposite = false;
-      let maxLength = Infinity;
 
       const variableMatches = VARIABLE_PATTERN.exec(key);
 
       if (variableMatches) {
         key = variableMatches[1];
 
-        if (variableMatches[3]) {
-          isComposite = true;
-        } else if (variableMatches[5]) {
-          maxLength = parseInt(variableMatches[5], 10);
-        }
+        isComposite = !!variableMatches[3];
+        maxLength = parseInt(variableMatches[5], 10);
       }
 
       return { key, maxLength, isComposite };
@@ -129,7 +126,7 @@ interface StringifyPrimitiveOptions {
 
 function stringifyPrimitive(
   value: string,
-  { skipEncoding }: StringifyPrimitiveOptions = {},
+  { skipEncoding }: StringifyPrimitiveOptions,
 ) {
   if (skipEncoding) {
     value = encodeURI(value)
@@ -303,7 +300,7 @@ function stringifyExpressionBlock(
     skipEncoding,
     withAssignment,
     skipEmptyValues,
-  }: StringifyExpressionBlockOptions = {},
+  }: StringifyExpressionBlockOptions,
 ) {
   const values: string[] = [];
 
