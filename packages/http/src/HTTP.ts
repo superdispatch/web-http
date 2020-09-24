@@ -44,24 +44,17 @@ export function createHTTP({
     options?: TParams & HTTPRequestOptions,
   ): Promise<Response> {
     let signal: undefined | AbortSignal;
-    let endpointOptions: HTTPEndpointOptions = {};
 
     if (options) {
-      ({ signal, ...endpointOptions } = options);
-    }
-
-    if (defaultBaseURL != null && endpointOptions.baseURL == null) {
-      endpointOptions.baseURL = defaultBaseURL;
-    }
-
-    if (defaultHeaders != null) {
-      endpointOptions.headers = {
-        ...defaultHeaders,
-        ...endpointOptions.headers,
+      signal = options.signal;
+      options = {
+        baseURL: defaultBaseURL,
+        ...options,
+        headers: { ...defaultHeaders, ...options.headers },
       };
     }
 
-    const endpoint = parseHTTPEndpoint(template, endpointOptions);
+    const endpoint = parseHTTPEndpoint(template, options);
 
     const init: RequestInit = {
       method: endpoint.method,
@@ -93,18 +86,9 @@ export function createHTTP({
     endpoint: string,
     options?: TParams & HTTPRequestJSONOptions<TData>,
   ): Promise<TData> {
-    let endpointOptions: HTTPRequestOptions = {};
-    let parseJSON: HTTPRequestJSONOptions<TData>['parseJSON'];
+    const parseJSON = options?.parseJSON ?? defaultParseJSON;
 
-    if (options) {
-      ({ parseJSON, ...endpointOptions } = options);
-    }
-
-    if (parseJSON == null) {
-      parseJSON = defaultParseJSON;
-    }
-
-    return request(endpoint, endpointOptions).then((response) =>
+    return request(endpoint, options).then((response) =>
       response.text().then(parseJSON),
     );
   }
