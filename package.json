@@ -16,6 +16,7 @@
     "prebump": "yarn && yarn lint && yarn test && yarn build",
     "bump": "lerna version",
     "lint": "js-tools lint",
+    "size": "yarn build && size-limit",
     "tdd": "jest --watch",
     "test": "jest --coverage"
   },
@@ -64,6 +65,7 @@
     "@pika/plugin-build-web": "^0.9.2",
     "@pika/plugin-bundle-types": "^0.9.2",
     "@pika/plugin-standard-pkg": "^0.9.2",
+    "@size-limit/preset-small-lib": "^4.6.0",
     "@superdispatch/babel-preset": "^0.2.0",
     "@superdispatch/eslint-plugin": "^0.2.0",
     "@superdispatch/js-tools": "^0.2.0",
@@ -86,11 +88,20 @@
     "prettier": "^2.1.2",
     "react": "^16.13.1",
     "react-test-renderer": "^16.13.1",
+    "size-limit": "^4.6.0",
     "typescript": "~4.0.0",
     "uritemplate-test": "https://github.com/uri-templates/uritemplate-test#520fdd8b0f78779d12178c357a986e0e727f4bd0"
   },
   "engines": {
     "node": ">=10.0.0"
   },
-  "resetMocks": true
+  "resetMocks": true,
+  "size-limit": [
+    {
+      "path": "packages/http/pkg/dist-web/index.js"
+    },
+    {
+      "path": "packages/http-resource/pkg/dist-web/index.js"
+    }
+  ]
 }
