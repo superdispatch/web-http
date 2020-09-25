@@ -109,10 +109,10 @@ interface StringifyListOptions extends StringifyPrimitiveOptions {
 
 function stringifyList(
   param: ListParam,
-  { separator, ...options }: StringifyListOptions,
+  { separator, skipEncoding }: StringifyListOptions,
 ): string {
   return param
-    .map((value) => stringifyPrimitive(value, options))
+    .map((value) => stringifyPrimitive(value, { skipEncoding }))
     .join(separator);
 }
 
