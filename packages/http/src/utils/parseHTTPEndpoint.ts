@@ -52,9 +52,9 @@ export function parseHTTPEndpoint<T extends URITemplateParams>(
   if (options == null) {
     [endpoint.method, endpoint.url] = parseEndpointTemplate(template);
   } else {
-    const { json, body, baseURL, headers, ...params } = options;
+    const { json, body, baseURL, headers } = options;
 
-    [endpoint.method, endpoint.url] = parseEndpointTemplate(template, params);
+    [endpoint.method, endpoint.url] = parseEndpointTemplate(template, options);
 
     if (baseURL) {
       endpoint.url = baseURL + endpoint.url;
