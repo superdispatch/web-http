@@ -6,7 +6,8 @@
     "url": "https://github.com/superdispatch/ui.git"
   },
   "license": "MIT",
-  "main": "pkg/dist-web/index.js",
+  "main": "src/index.ts",
+  "module": "pkg/dist-web/index.js",
   "types": "src/index.ts",
   "scripts": {
     "build": "pika build"
