@@ -14,22 +14,6 @@ type Operator =
   /** @link https://tools.ietf.org/html/rfc6570#section-3.2.9 */
   | '&';
 
-type PrimitiveParam = number | string;
-type ListParam = PrimitiveParam[];
-type CompositeParam = Record<string, PrimitiveParam>;
-type Param = PrimitiveParam | ListParam | CompositeParam;
-
-function isCompositeParam(param: Param): param is CompositeParam {
-  return (
-    typeof param === 'object' &&
-    Object.prototype.toString.call(param) === '[object Object]'
-  );
-}
-
-function flattenCompositeParam(param: CompositeParam): ListParam {
-  return Object.entries(param).flat();
-}
-
 interface Variable {
   key: string;
   maxLength: number;
@@ -43,10 +27,10 @@ interface ExpressionBlock {
 
 function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
   const operatorMatch = /^([+#./;?&])(.+)/.exec(expressionBlock);
-  let operator = '';
+  let operator: undefined | Operator = undefined;
 
   if (operatorMatch) {
-    operator = operatorMatch[1];
+    operator = operatorMatch[1] as Operator;
     expressionBlock = operatorMatch[2];
   }
 
@@ -73,70 +57,98 @@ function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
     },
   );
 
-  return { variables, operator: (operator || undefined) as Operator };
+  return { operator, variables };
 }
 
-// Using `any` as a workaround for `Index signature is missing in type` error.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type URITemplateParams = Record<string, any>;
-
-interface StringifyPrimitiveOptions {
-  skipEncoding?: boolean;
-}
-
-function stringifyPrimitive(
-  value: PrimitiveParam,
-  { skipEncoding }: StringifyPrimitiveOptions,
-) {
-  value = String(value);
-
+function encodeString(
+  value: string,
+  skipEncoding: boolean | undefined,
+): string {
   if (skipEncoding) {
-    value = encodeURI(value)
-      // Rollback double encoding.
-      .replace(/%25([0-9A-F]{2})/gi, '%$1');
-  } else {
-    value = encodeURIComponent(value)
-      // Encode exclamation sign.
-      .replace(/!/g, '%21');
+    return (
+      encodeURI(value)
+        // Revert double encoding.
+        .replace(/%25([0-9A-F]{2})/gi, '%$1')
+    );
   }
 
-  return value;
+  return (
+    encodeURIComponent(value)
+      // Encode exclamation sign.
+      .replace(/!/g, '%21')
+  );
 }
 
-interface StringifyListOptions extends StringifyPrimitiveOptions {
-  separator?: string;
+type BaseParam = null | undefined | number | string | Date;
+
+function encodeBaseParam(
+  value: BaseParam,
+  skipEncoding: boolean | undefined,
+): null | string {
+  if (value == null) {
+    return null;
+  }
+
+  if (typeof value == 'number' && !Number.isFinite(value)) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return value.toJSON();
+  }
+
+  return encodeString(String(value), skipEncoding);
 }
 
-function stringifyList(
+type ListParam = BaseParam[];
+
+function encodeListParam(
   param: ListParam,
-  { separator, skipEncoding }: StringifyListOptions,
+  separator: string | undefined,
+  skipEncoding: boolean | undefined,
 ): string {
   return param
-    .map((value) => stringifyPrimitive(value, { skipEncoding }))
+    .map((value) => encodeBaseParam(value, skipEncoding))
     .join(separator);
 }
 
-interface StringifyAssignmentOptions extends StringifyListOptions {
+type CompositeParam = Record<string, BaseParam>;
+
+function compositeToList(param: CompositeParam): ListParam {
+  return Object.entries(param).flat();
+}
+
+type Param = BaseParam | ListParam | CompositeParam;
+
+function isCompositeParam(param: Param): param is CompositeParam {
+  return (
+    typeof param === 'object' &&
+    Object.prototype.toString.call(param) === '[object Object]'
+  );
+}
+
+interface EncodeAssignmentOptions {
+  separator?: string;
+  skipEncoding?: boolean;
   skipEmptyValues?: boolean;
 }
 
-function stringifyAssignment(
+function encodeAssignment(
   key: string,
-  value: PrimitiveParam | ListParam,
-  {
-    separator,
-    skipEncoding,
-
-    skipEmptyValues,
-  }: StringifyAssignmentOptions,
-): string {
-  let result = stringifyPrimitive(key, { skipEncoding: true });
-
+  value: BaseParam | ListParam,
+  { separator, skipEncoding, skipEmptyValues }: EncodeAssignmentOptions,
+): null | string {
   if (Array.isArray(value)) {
-    value = stringifyList(value, { separator, skipEncoding });
+    value = encodeListParam(value, separator, skipEncoding);
   } else {
-    value = stringifyPrimitive(value, { skipEncoding });
+    value = encodeBaseParam(value, skipEncoding);
   }
+
+  if (value == null) {
+    return null;
+  }
+
+  let result = encodeString(key, true);
 
   if (value || !skipEmptyValues) {
     result += `=${value}`;
@@ -145,34 +157,19 @@ function stringifyAssignment(
   return result;
 }
 
-function stringifyCompositeParam(
-  param: CompositeParam,
-  { separator, skipEncoding, skipEmptyValues }: StringifyAssignmentOptions,
-): string {
-  return Object.entries(param)
-    .map(([key, value]) =>
-      stringifyAssignment(key, value, {
-        separator,
-        skipEncoding,
-        skipEmptyValues,
-      }),
-    )
-    .join(separator);
-}
-
-interface StringifyVariableOptions extends StringifyAssignmentOptions {
+interface EncodeVariableOptions extends EncodeAssignmentOptions {
   withAssignment?: boolean;
 }
 
-function stringifyVariable(
-  param: null | Param,
-  { key, maxLength, isComposite }: Variable,
+function encodeVariable(
+  param: Param,
+  { key: variableKey, maxLength, isComposite }: Variable,
   {
     separator,
     skipEncoding,
     withAssignment,
     skipEmptyValues,
-  }: StringifyVariableOptions,
+  }: EncodeVariableOptions,
 ): null | string {
   // Skip undefined values.
   if (param == null) {
@@ -181,30 +178,28 @@ function stringifyVariable(
 
   if (isCompositeParam(param)) {
     if (isComposite) {
-      if (withAssignment) {
-        const entries = Object.entries(param).map(([prop, value]) =>
-          stringifyAssignment(prop, value, {
-            separator,
-            skipEncoding,
-            skipEmptyValues,
-          }),
-        );
+      const assignments: string[] = [];
 
-        if (entries.length === 0) {
-          return null;
+      for (const [key, value] of Object.entries(param)) {
+        const assignment = encodeAssignment(key, value, {
+          separator,
+          skipEncoding,
+          skipEmptyValues,
+        });
+
+        if (assignment != null) {
+          assignments.push(assignment);
         }
-
-        return entries.join(separator);
       }
 
-      return stringifyCompositeParam(param, {
-        separator,
-        skipEncoding,
-        skipEmptyValues,
-      });
+      if (assignments.length === 0) {
+        return null;
+      }
+
+      return assignments.join(separator);
     }
 
-    param = flattenCompositeParam(param);
+    param = compositeToList(param);
   }
 
   if (Array.isArray(param)) {
@@ -217,24 +212,39 @@ function stringifyVariable(
 
     if (withAssignment) {
       if (isComposite) {
-        return param
-          .map((value) =>
-            stringifyAssignment(key, value, { skipEncoding, skipEmptyValues }),
-          )
-          .join(separator);
+        const assignments: string[] = [];
+
+        for (const value of param) {
+          const assignment = encodeAssignment(variableKey, value, {
+            separator,
+            skipEncoding,
+            skipEmptyValues,
+          });
+
+          if (assignment != null) {
+            assignments.push(assignment);
+          }
+        }
+
+        if (assignments.length === 0) {
+          return null;
+        }
+
+        return assignments.join(separator);
       }
 
-      return stringifyAssignment(key, param, {
+      return encodeAssignment(variableKey, param, {
         skipEncoding,
         skipEmptyValues,
         separator: listSeparator,
       });
     }
 
-    return stringifyList(param, {
+    return encodeListParam(
+      param,
+      isComposite ? separator : undefined,
       skipEncoding,
-      separator: isComposite ? separator : undefined,
-    });
+    );
   }
 
   // Truncate string values with max length.
@@ -243,17 +253,24 @@ function stringifyVariable(
   }
 
   if (withAssignment) {
-    return stringifyAssignment(key, param, { skipEncoding, skipEmptyValues });
+    return encodeAssignment(variableKey, param, {
+      skipEncoding,
+      skipEmptyValues,
+    });
   }
 
-  return stringifyPrimitive(param, { skipEncoding });
+  return encodeBaseParam(param, skipEncoding);
 }
 
-interface StringifyExpressionBlockOptions extends StringifyVariableOptions {
+// Using `any` as a workaround for `Index signature is missing in type` error.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type URITemplateParams = Record<string, any>;
+
+interface EncodeExpressionBlockOptions extends EncodeVariableOptions {
   prefix?: string;
 }
 
-function stringifyExpressionBlock(
+function encodeExpressionBlock(
   params: URITemplateParams,
   variables: Variable[],
   {
@@ -262,12 +279,12 @@ function stringifyExpressionBlock(
     skipEncoding,
     withAssignment,
     skipEmptyValues,
-  }: StringifyExpressionBlockOptions,
+  }: EncodeExpressionBlockOptions,
 ) {
   const values: string[] = [];
 
   for (const variable of variables) {
-    const value = stringifyVariable(params[variable.key], variable, {
+    const value = encodeVariable(params[variable.key], variable, {
       separator,
       skipEncoding,
       withAssignment,
@@ -298,7 +315,7 @@ export function parseURITemplate<T extends URITemplateParams>(
     /{(.*?)}/g,
     (_, expressionBlock: string) => {
       const { operator, variables } = parseExpressionBlock(expressionBlock);
-      const options: StringifyExpressionBlockOptions = {};
+      const options: EncodeExpressionBlockOptions = { prefix: operator };
 
       switch (operator) {
         case '+': {
@@ -308,40 +325,32 @@ export function parseURITemplate<T extends URITemplateParams>(
         }
 
         case '#': {
-          options.prefix = operator;
           options.skipEncoding = true;
-
           break;
         }
 
         case '.':
         case '/': {
-          options.prefix = operator;
           options.separator = operator;
-
           break;
         }
 
         case ';': {
-          options.prefix = operator;
           options.separator = operator;
           options.withAssignment = true;
           options.skipEmptyValues = true;
-
           break;
         }
 
         case '?':
         case '&': {
           options.separator = '&';
-          options.prefix = operator;
           options.withAssignment = true;
-
           break;
         }
       }
 
-      return stringifyExpressionBlock(params, variables, options);
+      return encodeExpressionBlock(params, variables, options);
     },
   );
 }
