@@ -343,7 +343,7 @@ export function parseURITemplate<T extends URITemplateParams>(
     /{(.*?)}/g,
     (_, expressionBlock: string) => {
       const { operator, variables } = parseExpressionBlock(expressionBlock);
-      const options: EncodeExpressionBlockOptions = {};
+      const options: EncodeExpressionBlockOptions = { prefix: operator };
 
       switch (operator) {
         case '+': {
@@ -353,35 +353,27 @@ export function parseURITemplate<T extends URITemplateParams>(
         }
 
         case '#': {
-          options.prefix = operator;
           options.skipEncoding = true;
-
           break;
         }
 
         case '.':
         case '/': {
-          options.prefix = operator;
           options.separator = operator;
-
           break;
         }
 
         case ';': {
-          options.prefix = operator;
           options.separator = operator;
           options.withAssignment = true;
           options.skipEmptyValues = true;
-
           break;
         }
 
         case '?':
         case '&': {
           options.separator = '&';
-          options.prefix = operator;
           options.withAssignment = true;
-
           break;
         }
       }
