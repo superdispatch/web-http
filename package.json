@@ -13,9 +13,9 @@
   },
   "scripts": {
     "build": "lerna run build --no-private",
-    "prebump": "yarn && yarn lint && yarn test && yarn build",
-    "bump": "lerna version",
     "lint": "js-tools lint",
+    "prerelease": "yarn --frozen-lockfile && yarn tsc && yarn lint && yarn test",
+    "release": "lerna version",
     "size": "yarn build && size-limit",
     "tdd": "jest --watch",
     "test": "jest --coverage"
