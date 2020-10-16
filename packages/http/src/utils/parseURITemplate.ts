@@ -14,6 +14,52 @@ type Operator =
   /** @link https://tools.ietf.org/html/rfc6570#section-3.2.9 */
   | '&';
 
+interface Variable {
+  key: string;
+  maxLength: number;
+  isComposite: boolean;
+}
+
+interface ExpressionBlock {
+  operator?: Operator;
+  variables: Variable[];
+}
+
+function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
+  const operatorMatch = /^([+#./;?&])(.+)/.exec(expressionBlock);
+  let operator: undefined | Operator = undefined;
+
+  if (operatorMatch) {
+    operator = operatorMatch[1] as Operator;
+    expressionBlock = operatorMatch[2];
+  }
+
+  const variables = expressionBlock.split(/,/g).map(
+    (key): Variable => {
+      let maxLength = NaN;
+      let isComposite = false;
+
+      const variableMatches =
+        /**
+         * @link https://tools.ietf.org/html/rfc6570#section-2.4.1
+         * @link https://tools.ietf.org/html/rfc6570#section-2.4.2
+         */
+        /(.+)((\*)|(:(\d+)))$/.exec(key);
+
+      if (variableMatches) {
+        key = variableMatches[1];
+
+        isComposite = !!variableMatches[3];
+        maxLength = parseInt(variableMatches[5], 10);
+      }
+
+      return { key, maxLength, isComposite };
+    },
+  );
+
+  return { operator, variables };
+}
+
 function encodeString(
   value: string,
   skipEncoding: boolean | undefined,
@@ -79,52 +125,6 @@ function isCompositeParam(param: Param): param is CompositeParam {
     typeof param === 'object' &&
     Object.prototype.toString.call(param) === '[object Object]'
   );
-}
-
-interface Variable {
-  key: string;
-  maxLength: number;
-  isComposite: boolean;
-}
-
-interface ExpressionBlock {
-  operator?: Operator;
-  variables: Variable[];
-}
-
-function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
-  const operatorMatch = /^([+#./;?&])(.+)/.exec(expressionBlock);
-  let operator = '';
-
-  if (operatorMatch) {
-    operator = operatorMatch[1];
-    expressionBlock = operatorMatch[2];
-  }
-
-  const variables = expressionBlock.split(/,/g).map(
-    (key): Variable => {
-      let maxLength = NaN;
-      let isComposite = false;
-
-      const variableMatches =
-        /**
-         * @link https://tools.ietf.org/html/rfc6570#section-2.4.1
-         * @link https://tools.ietf.org/html/rfc6570#section-2.4.2
-         */
-        /(.+)((\*)|(:(\d+)))$/.exec(key);
-
-      if (variableMatches) {
-        key = variableMatches[1];
-
-        isComposite = !!variableMatches[3];
-        maxLength = parseInt(variableMatches[5], 10);
-      }
-
-      return { key, maxLength, isComposite };
-    },
-  );
-
-  return { variables, operator: (operator || undefined) as Operator };
 }
 
 interface EncodeAssignmentOptions {

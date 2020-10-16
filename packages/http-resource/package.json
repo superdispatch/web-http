@@ -13,9 +13,9 @@
     "build": "pika build"
   },
   "dependencies": {
-    "@babel/runtime": "^7.8.4",
+    "@babel/runtime": "^7.12.1",
     "@superdispatch/http": "^0.0.4",
-    "swr": "^0.3.3"
+    "swr": "^0.3.5"
   },
   "peerDependencies": {
     "react": "^16.13.0"
