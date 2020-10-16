@@ -2,6 +2,6 @@
   "exclude": ["**/pkg/**/*"],
   "extends": "@superdispatch/tsconfig",
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "node_modules/.cache/tsconfig.tsbuildinfo"
   }
 }
