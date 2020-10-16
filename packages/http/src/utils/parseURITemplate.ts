@@ -56,14 +56,10 @@ function encodeBaseParam(
 
 type ListParam = BaseParam[];
 
-interface EncodeListParamOptions {
-  separator?: string;
-  skipEncoding?: boolean;
-}
-
 function encodeListParam(
   param: ListParam,
-  { separator, skipEncoding }: EncodeListParamOptions,
+  separator: string | undefined,
+  skipEncoding: boolean | undefined,
 ): string {
   return param
     .map((value) => encodeBaseParam(value, skipEncoding))
@@ -72,7 +68,7 @@ function encodeListParam(
 
 type CompositeParam = Record<string, BaseParam>;
 
-function flattenCompositeParam(param: CompositeParam): ListParam {
+function compositeToList(param: CompositeParam): ListParam {
   return Object.entries(param).flat();
 }
 
@@ -131,22 +127,19 @@ function parseExpressionBlock(expressionBlock: string): ExpressionBlock {
   return { variables, operator: (operator || undefined) as Operator };
 }
 
-interface EncodeAssignmentOptions extends EncodeListParamOptions {
+interface EncodeAssignmentOptions {
+  separator?: string;
+  skipEncoding?: boolean;
   skipEmptyValues?: boolean;
 }
 
 function encodeAssignment(
   key: string,
   value: BaseParam | ListParam,
-  {
-    separator,
-    skipEncoding,
-
-    skipEmptyValues,
-  }: EncodeAssignmentOptions,
+  { separator, skipEncoding, skipEmptyValues }: EncodeAssignmentOptions,
 ): null | string {
   if (Array.isArray(value)) {
-    value = encodeListParam(value, { separator, skipEncoding });
+    value = encodeListParam(value, separator, skipEncoding);
   } else {
     value = encodeBaseParam(value, skipEncoding);
   }
@@ -162,21 +155,6 @@ function encodeAssignment(
   }
 
   return result;
-}
-
-function encodeCompositeParam(
-  param: CompositeParam,
-  { separator, skipEncoding, skipEmptyValues }: EncodeAssignmentOptions,
-): string {
-  return Object.entries(param)
-    .map(([key, value]) =>
-      encodeAssignment(key, value, {
-        separator,
-        skipEncoding,
-        skipEmptyValues,
-      }),
-    )
-    .join(separator);
 }
 
 interface EncodeVariableOptions extends EncodeAssignmentOptions {
@@ -200,36 +178,28 @@ function encodeVariable(
 
   if (isCompositeParam(param)) {
     if (isComposite) {
-      if (withAssignment) {
-        const assignments: string[] = [];
+      const assignments: string[] = [];
 
-        for (const [key, value] of Object.entries(param)) {
-          const assignment = encodeAssignment(key, value, {
-            separator,
-            skipEncoding,
-            skipEmptyValues,
-          });
+      for (const [key, value] of Object.entries(param)) {
+        const assignment = encodeAssignment(key, value, {
+          separator,
+          skipEncoding,
+          skipEmptyValues,
+        });
 
-          if (assignment != null) {
-            assignments.push(assignment);
-          }
+        if (assignment != null) {
+          assignments.push(assignment);
         }
-
-        if (assignments.length === 0) {
-          return null;
-        }
-
-        return assignments.join(separator);
       }
 
-      return encodeCompositeParam(param, {
-        separator,
-        skipEncoding,
-        skipEmptyValues,
-      });
+      if (assignments.length === 0) {
+        return null;
+      }
+
+      return assignments.join(separator);
     }
 
-    param = flattenCompositeParam(param);
+    param = compositeToList(param);
   }
 
   if (Array.isArray(param)) {
@@ -246,6 +216,7 @@ function encodeVariable(
 
         for (const value of param) {
           const assignment = encodeAssignment(variableKey, value, {
+            separator,
             skipEncoding,
             skipEmptyValues,
           });
@@ -269,10 +240,11 @@ function encodeVariable(
       });
     }
 
-    return encodeListParam(param, {
+    return encodeListParam(
+      param,
+      isComposite ? separator : undefined,
       skipEncoding,
-      separator: isComposite ? separator : undefined,
-    });
+    );
   }
 
   // Truncate string values with max length.
