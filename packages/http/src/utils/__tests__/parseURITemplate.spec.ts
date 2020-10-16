@@ -60,3 +60,62 @@ for (const [description, spec] of specs) {
     }
   });
 }
+
+test('invalid values', () => {
+  const validParams = {
+    a: 0,
+    b: '',
+    c: [],
+    d: new Date(0),
+  };
+
+  const invalidParams = {
+    e: null,
+    f: undefined,
+    g: NaN,
+    h: Infinity,
+    i: Infinity,
+    j: new Date(NaN),
+  };
+
+  const params = {
+    ...validParams,
+    ...invalidParams,
+  };
+
+  expect(parseURITemplate('{?a,b,c,d,e,f,g,h,i,j}', params)).toBe(
+    '?a=0&b=&d=1970-01-01T00:00:00.000Z',
+  );
+
+  expect(parseURITemplate('{?a,b,c,d,e,f,g,h,i,j}', invalidParams)).toBe('');
+
+  expect(parseURITemplate('{?params}', { params })).toBe(
+    '?params=a,0,b,,c,,d,1970-01-01T00:00:00.000Z,e,,f,,g,,h,,i,,j,',
+  );
+
+  expect(parseURITemplate('{?params}', { params: invalidParams })).toBe(
+    '?params=e,,f,,g,,h,,i,,j,',
+  );
+
+  expect(parseURITemplate('{?params*}', { params })).toBe(
+    '?a=0&b=&c=&d=1970-01-01T00:00:00.000Z',
+  );
+
+  expect(parseURITemplate('{?params*}', { params: invalidParams })).toBe('');
+
+  expect(parseURITemplate('{?params}', { params: Object.values(params) })).toBe(
+    '?params=0,,,1970-01-01T00:00:00.000Z,,,,,,',
+  );
+
+  expect(
+    parseURITemplate('{?params}', { params: Object.values(invalidParams) }),
+  ).toBe('?params=,,,,,');
+
+  expect(
+    parseURITemplate('{?params*}', { params: Object.values(params) }),
+  ).toBe('?params=0&params=&params=&params=1970-01-01T00:00:00.000Z');
+
+  expect(
+    parseURITemplate('{?params*}', { params: Object.values(invalidParams) }),
+  ).toBe('');
+});
