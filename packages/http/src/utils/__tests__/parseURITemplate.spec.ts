@@ -44,6 +44,7 @@ test('spec content', () => {
 });
 
 for (const [description, spec] of specs) {
+  // eslint-disable-next-line jest/valid-title
   describe(description, () => {
     for (const [title, { variables, testcases }] of Object.entries(spec)) {
       for (const [template, expected] of testcases) {
@@ -51,8 +52,10 @@ for (const [description, spec] of specs) {
           const output = parseURITemplate(template as string, variables);
 
           if (typeof expected === 'string') {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(output).toBe(expected);
           } else {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(expected).toContain(output);
           }
         });
