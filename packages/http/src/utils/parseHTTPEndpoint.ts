@@ -11,8 +11,7 @@ function parseEndpointTemplate<T extends URITemplateParams>(
   const matches = METHOD_PATTERN.exec(url);
 
   if (matches) {
-    url = matches[2];
-    method = matches[1].toUpperCase();
+    [, method, url] = matches;
   }
 
   if (params != null) {
