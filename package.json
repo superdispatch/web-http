@@ -15,7 +15,7 @@
     "build": "lerna run build --no-private",
     "lint": "js-tools lint",
     "prerelease": "yarn --frozen-lockfile && yarn tsc && yarn lint && yarn test",
-    "release": "lerna version",
+    "release": "lerna publish",
     "size": "yarn build && size-limit",
     "tdd": "jest --watch",
     "test": "jest --coverage"
