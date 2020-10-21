@@ -15,7 +15,7 @@
   "dependencies": {
     "@babel/runtime": "^7.12.1",
     "@superdispatch/http": "^0.0.5",
-    "swr": "^0.3.5"
+    "swr": "^0.3.6"
   },
   "peerDependencies": {
     "react": "^16.13.0"
