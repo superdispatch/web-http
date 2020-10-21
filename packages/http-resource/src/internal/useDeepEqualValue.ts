@@ -1,12 +1,15 @@
 import { dequal } from 'dequal/lite';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function useDeepEqualValue<T>(value: T): T {
   const ref = useRef(value);
+  const isEqual = dequal(ref.current, value);
 
-  if (!dequal(ref.current, value)) {
-    ref.current = value;
-  }
+  useEffect(() => {
+    if (!isEqual) {
+      ref.current = value;
+    }
+  });
 
-  return ref.current;
+  return isEqual ? ref.current : value;
 }
