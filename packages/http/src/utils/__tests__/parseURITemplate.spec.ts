@@ -64,6 +64,16 @@ for (const [description, spec] of specs) {
   });
 }
 
+test('composite sorting', () => {
+  expect(
+    parseURITemplate('{?z,params*,a}', {
+      z: 0,
+      a: 5,
+      params: { z: 1, g: 3, c: 2, h: 4 },
+    }),
+  ).toBe('?z=0&c=2&g=3&h=4&z=1&a=5');
+});
+
 test('invalid values', () => {
   const validParams = {
     a: 0,
