@@ -9,7 +9,10 @@ module.exports = {
 
     {
       files: '*.ts',
-      extends: ['plugin:@superdispatch/typescript'],
+      extends: [
+        'plugin:@superdispatch/react',
+        'plugin:@superdispatch/typescript',
+      ],
       parserOptions: {
         project: './tsconfig.json',
       },
