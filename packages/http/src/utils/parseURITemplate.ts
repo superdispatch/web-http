@@ -157,6 +157,35 @@ function encodeAssignment(
   return result;
 }
 
+type AssignmentEntry = [key: string, value: BaseParam | ListParam];
+
+function encodeAssignmentEntries(
+  entries: AssignmentEntry[],
+  { separator, skipEncoding, skipEmptyValues }: EncodeAssignmentOptions,
+): null | string {
+  const assignments: string[] = [];
+
+  for (const [key, value] of entries) {
+    const assignment = encodeAssignment(key, value, {
+      separator,
+      skipEncoding,
+      skipEmptyValues,
+    });
+
+    if (assignment != null) {
+      assignments.push(assignment);
+    }
+  }
+
+  if (assignments.length === 0) {
+    return null;
+  }
+
+  return assignments
+    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+    .join(separator);
+}
+
 interface EncodeVariableOptions extends EncodeAssignmentOptions {
   withAssignment?: boolean;
 }
@@ -178,25 +207,11 @@ function encodeVariable(
 
   if (isCompositeParam(param)) {
     if (isComposite) {
-      const assignments: string[] = [];
-
-      for (const [key, value] of Object.entries(param)) {
-        const assignment = encodeAssignment(key, value, {
-          separator,
-          skipEncoding,
-          skipEmptyValues,
-        });
-
-        if (assignment != null) {
-          assignments.push(assignment);
-        }
-      }
-
-      if (assignments.length === 0) {
-        return null;
-      }
-
-      return assignments.join(separator);
+      return encodeAssignmentEntries(Object.entries(param), {
+        separator,
+        skipEncoding,
+        skipEmptyValues,
+      });
     }
 
     param = compositeToList(param);
@@ -212,25 +227,16 @@ function encodeVariable(
 
     if (withAssignment) {
       if (isComposite) {
-        const assignments: string[] = [];
+        const entries = param.map<AssignmentEntry>((value) => [
+          variableKey,
+          value,
+        ]);
 
-        for (const value of param) {
-          const assignment = encodeAssignment(variableKey, value, {
-            separator,
-            skipEncoding,
-            skipEmptyValues,
-          });
-
-          if (assignment != null) {
-            assignments.push(assignment);
-          }
-        }
-
-        if (assignments.length === 0) {
-          return null;
-        }
-
-        return assignments.join(separator);
+        return encodeAssignmentEntries(entries, {
+          separator,
+          skipEncoding,
+          skipEmptyValues,
+        });
       }
 
       return encodeAssignment(variableKey, param, {
