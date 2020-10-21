@@ -1,14 +1,10 @@
 import { DependencyList, useMemo } from 'react';
 
-import { Comparator, useDeepEqualValue } from './useDeepEqualValue';
+import { useDeepEqualValue } from './useDeepEqualValue';
 
-export function useDeepEqualMemo<T>(
-  factory: () => T,
-  deps: DependencyList,
-  isEqual: Comparator,
-): T {
-  const pureDeps = useDeepEqualValue(deps, isEqual);
+export function useDeepEqualMemo<T>(factory: () => T, deps: DependencyList): T {
+  const pureDeps = useDeepEqualValue(deps);
   const value = useMemo(factory, pureDeps);
 
-  return useDeepEqualValue(value, isEqual);
+  return useDeepEqualValue(value);
 }

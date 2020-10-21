@@ -19,10 +19,17 @@ module.exports = {
           { allow: ['eslint-disable-next-line'] },
         ],
 
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: ['dequal'],
+          },
+        ],
+
         'import/no-internal-modules': [
           'error',
           {
-            allow: ['**/packages/*/src/**'],
+            allow: ['**/packages/*/src/**', 'dequal/lite'],
           },
         ],
       },
