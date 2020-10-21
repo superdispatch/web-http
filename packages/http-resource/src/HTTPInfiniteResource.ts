@@ -38,11 +38,9 @@ export function useHTTPInfiniteResource<
   fetcher: HTTPResourceFetcher<TData>,
   { compare = deepEqual, ...options }: HTTPInfiniteResourceOptions<TData> = {},
 ): HTTPInfiniteResource<TData> {
-  const [template, baseParams] = useDeepEqualMemo(
-    () => inputToArgs(input),
-    [input],
-    compare,
-  );
+  const [template, baseParams] = useDeepEqualMemo(() => inputToArgs(input), [
+    input,
+  ]);
 
   return useSWRInfinite<TData, Error>(
     (index, prev) => {
