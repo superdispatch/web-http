@@ -1,3 +1,4 @@
+import { useDeepEqualMemo } from '@superdispatch/hooks';
 import {
   HTTPEndpointOptions,
   HTTPEndpointParams,
@@ -10,7 +11,6 @@ import {
   useSWRInfinite,
 } from 'swr';
 
-import { useDeepEqualMemo } from './internal/useDeepEqualMemo';
 import { argsToKey, inputToArgs } from './internal/utils';
 import { HTTPResourceFetcher, HTTPResourceInput } from './types';
 
