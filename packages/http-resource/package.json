@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.12.1",
+    "@superdispatch/hooks": "^0.5.5",
     "@superdispatch/http": "^0.0.5",
-    "dequal": "^2.0.2",
     "swr": "^0.3.6"
   },
   "peerDependencies": {
