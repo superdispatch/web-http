@@ -1,5 +1,4 @@
 import { URITemplateParams } from '@superdispatch/http';
-import deepEqual from 'fast-deep-equal';
 import useSWR, {
   ConfigInterface as SWRConfigInterface,
   responseInterface as SWRResponseInterface,
@@ -22,26 +21,21 @@ export function useHTTPResource<
 >(
   input: null | HTTPResourceInput<TParams>,
   fetcher: HTTPResourceFetcher<TData>,
-  { compare = deepEqual, ...options }: HTTPResourceOptions<TData> = {},
+  options?: HTTPResourceOptions<TData>,
 ): HTTPResource<TData> {
-  const [key, template, params] = useDeepEqualMemo(
-    () => {
-      if (input == null) {
-        return [null];
-      }
+  const [key, template, params] = useDeepEqualMemo(() => {
+    if (input == null) {
+      return [null];
+    }
 
-      const [nextTemplate, nextParams] = inputToArgs(input);
-      const nextKey = argsToKey([nextTemplate, nextParams]);
+    const [nextTemplate, nextParams] = inputToArgs(input);
+    const nextKey = argsToKey([nextTemplate, nextParams]);
 
-      return [nextKey, nextTemplate, nextParams];
-    },
-    [input],
-    compare,
-  );
+    return [nextKey, nextTemplate, nextParams];
+  }, [input]);
 
   return useSWR<TData, Error>(key, {
     ...options,
-    compare,
     fetcher: !template ? undefined : () => fetcher(template, params),
   });
 }
