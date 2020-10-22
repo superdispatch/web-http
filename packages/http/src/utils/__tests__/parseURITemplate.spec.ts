@@ -66,12 +66,13 @@ for (const [description, spec] of specs) {
 
 test('composite sorting', () => {
   expect(
-    parseURITemplate('{?z,params*,a}', {
-      z: 0,
-      a: 5,
-      params: { z: 1, g: 3, c: 2, h: 4 },
+    parseURITemplate('{?baz,foo,params*,bar}', {
+      foo: 1,
+      baz: 2,
+      bar: 3,
+      params: { foo: 1, baz: 2, bar: 3 },
     }),
-  ).toBe('?z=0&c=2&g=3&h=4&z=1&a=5');
+  ).toBe('?baz=2&foo=1&bar=3&baz=2&foo=1&bar=3');
 });
 
 test('invalid values', () => {
