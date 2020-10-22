@@ -2298,10 +2298,10 @@
     eslint-plugin-testing-library "^3.3.2"
     lodash "^4.17.19"
 
-"@superdispatch/hooks@^0.5.5":
-  version "0.5.5"
-  resolved "https://registry.yarnpkg.com/@superdispatch/hooks/-/hooks-0.5.5.tgz#4dc983cb22c9226b4245a2a041fd8a4f340ec051"
-  integrity sha512-RtuzdDBM1xpJ4jaDU+iSXmKGiipnkMboK0AZpKiDcEdyuPlLfkID8f4e7VhaHOGNI7imeq3VZyFBmxvsEvh/ww==
+"@superdispatch/hooks@^0.5.6":
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/@superdispatch/hooks/-/hooks-0.5.6.tgz#6de36c35205d0cc89af5bf706f2bad356252c8ee"
+  integrity sha512-DcxjpB12mE22P3p2/uVlvfuxY/Jb0JUjCcNHAhaJ/auC9wPu4MV2adA7GbYYsMZdvFgcdR4WExgnfYsG6TGK4g==
   dependencies:
     dequal "^2.0.2"
 
