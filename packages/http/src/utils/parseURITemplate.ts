@@ -165,6 +165,8 @@ function encodeAssignmentEntries(
 ): null | string {
   const assignments: string[] = [];
 
+  entries = entries.slice().sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
+
   for (const [key, value] of entries) {
     const assignment = encodeAssignment(key, value, {
       separator,
@@ -181,9 +183,7 @@ function encodeAssignmentEntries(
     return null;
   }
 
-  return assignments
-    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
-    .join(separator);
+  return assignments.join(separator);
 }
 
 interface EncodeVariableOptions extends EncodeAssignmentOptions {
