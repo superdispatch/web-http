@@ -1,6 +1,6 @@
 {
   "name": "@superdispatch/http-resource",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "repository": {
     "type": "git",
     "url": "https://github.com/superdispatch/ui.git"
@@ -15,7 +15,7 @@
   "dependencies": {
     "@babel/runtime": "^7.12.1",
     "@superdispatch/hooks": "^0.5.6",
-    "@superdispatch/http": "^0.0.7",
+    "@superdispatch/http": "^0.0.8",
     "swr": "^0.3.6"
   },
   "peerDependencies": {
