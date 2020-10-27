@@ -4,7 +4,6 @@ import {
   HTTPEndpointParams,
   URITemplateParams,
 } from '@superdispatch/http';
-import deepEqual from 'fast-deep-equal';
 import {
   SWRInfiniteConfigInterface,
   SWRInfiniteResponseInterface,
@@ -36,7 +35,7 @@ export function useHTTPInfiniteResource<
   input: HTTPResourceInput<TParams>,
   makeParams: HTTPInfiniteResourceParamFactory<TData, TParams>,
   fetcher: HTTPResourceFetcher<TData>,
-  { compare = deepEqual, ...options }: HTTPInfiniteResourceOptions<TData> = {},
+  options?: HTTPInfiniteResourceOptions<TData>,
 ): HTTPInfiniteResource<TData> {
   const [template, baseParams] = useDeepEqualMemo(() => inputToArgs(input), [
     input,
@@ -59,6 +58,6 @@ export function useHTTPInfiniteResource<
 
       return fetcher(`${method} ${url}`, params);
     },
-    { ...options, compare },
+    options,
   );
 }
