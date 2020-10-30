@@ -46,6 +46,7 @@ test('basic', async () => {
 });
 
 test.each([
+  ['/settings', { key: 1 }, { key: 2 }],
   ['/users/{id}', { id: 1 }, { id: 2 }],
   ['POST /users/search', { body: 'foo' }, { body: 'bar' }],
   ['POST /users/search', { json: { name: 'foo' } }, { json: { name: 'bar' } }],
