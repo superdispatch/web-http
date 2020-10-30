@@ -29,7 +29,7 @@ export function useHTTPResource<
     }
 
     const [nextTemplate, nextParams] = inputToArgs(input);
-    const nextKey = argsToKey([nextTemplate, nextParams]);
+    const nextKey = argsToKey(nextTemplate, nextParams);
 
     return [nextKey, nextTemplate, nextParams];
   }, [input]);

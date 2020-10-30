@@ -2,6 +2,7 @@ import { parseHTTPEndpoint, URITemplateParams } from '@superdispatch/http';
 
 import {
   HTTPResourceFetcherArgs,
+  HTTPResourceFetcherOptions,
   HTTPResourceInput,
   HTTPResourceKey,
 } from '../types';
@@ -13,15 +14,23 @@ export function inputToArgs<TParams extends URITemplateParams>(
 }
 
 export function argsToKey<TParams extends URITemplateParams>(
-  args: HTTPResourceFetcherArgs<TParams>,
+  template: string,
+  options?: HTTPResourceFetcherOptions<TParams>,
 ): HTTPResourceKey {
-  const { url, body, method } = parseHTTPEndpoint(...args);
+  const { url, body, method } = parseHTTPEndpoint(template, options);
 
-  return [method, url, typeof body == 'string' ? body : undefined];
+  return [
+    method,
+    url,
+    typeof body == 'string' ? body : undefined,
+    options?.key,
+  ];
 }
 
 export function inputToKey<TParams extends URITemplateParams>(
   input: HTTPResourceInput<TParams>,
 ): HTTPResourceKey {
-  return argsToKey(inputToArgs(input));
+  const [template, options] = inputToArgs(input);
+
+  return argsToKey(template, options);
 }

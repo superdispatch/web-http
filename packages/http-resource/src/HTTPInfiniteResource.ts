@@ -1,4 +1,3 @@
-import { useDeepEqualMemo } from '@superdispatch/hooks';
 import {
   HTTPEndpointOptions,
   HTTPEndpointParams,
@@ -35,29 +34,29 @@ export function useHTTPInfiniteResource<
   input: HTTPResourceInput<TParams>,
   makeParams: HTTPInfiniteResourceParamFactory<TData, TParams>,
   fetcher: HTTPResourceFetcher<TData>,
-  options?: HTTPInfiniteResourceOptions<TData>,
+  resourceOptions?: HTTPInfiniteResourceOptions<TData>,
 ): HTTPInfiniteResource<TData> {
-  const [template, baseParams] = useDeepEqualMemo(() => inputToArgs(input), [
-    input,
-  ]);
+  const [template, baseParams] = inputToArgs(input);
 
   return useSWRInfinite<TData, Error>(
     (index, prev) => {
-      const pageParams = makeParams(index, prev);
+      const params = makeParams(index, prev);
 
-      return (
-        pageParams && argsToKey([template, { ...baseParams, ...pageParams }])
-      );
-    },
-    (method: string, url: string, body?: string) => {
-      const params: HTTPEndpointOptions = { ...baseParams };
-
-      if (body != null) {
-        params.body = body;
+      if (!params) {
+        return null;
       }
 
-      return fetcher(`${method} ${url}`, params);
+      return argsToKey(template, { ...baseParams, ...params });
     },
-    options,
+    (method: string, url: string, body?: string) => {
+      const options: HTTPEndpointOptions = { ...baseParams };
+
+      if (body != null) {
+        options.body = body;
+      }
+
+      return fetcher(`${method} ${url}`, options);
+    },
+    resourceOptions,
   );
 }
