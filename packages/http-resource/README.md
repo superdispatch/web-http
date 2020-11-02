@@ -18,7 +18,7 @@ yarn add @superdispatch/http-resource
 ```ts
 export type HTTPResourceOptions<TData> = Omit<
   ConfigInterface<TData, Error>,
-  'fetcher' | 'suspense'
+  'fetcher'
 >;
 
 export function useHTTPResource<
@@ -90,7 +90,7 @@ export function useUser(id: number) {
 ```ts
 export type HTTPInfiniteResourceOptions<TData> = Omit<
   SWRInfiniteConfigInterface<TData, Error>,
-  'fetcher' | 'suspense'
+  'fetcher'
 >;
 
 export type HTTPInfiniteResourceParamFactory<

@@ -10,7 +10,7 @@ import { HTTPResourceFetcher, HTTPResourceInput } from './types';
 
 export type HTTPResourceOptions<TData> = Omit<
   SWRConfigInterface<TData, Error>,
-  'fetcher' | 'suspense'
+  'fetcher'
 >;
 
 export type HTTPResource<TData> = SWRResponseInterface<TData, Error>;

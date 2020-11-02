@@ -14,7 +14,7 @@ import { HTTPResourceFetcher, HTTPResourceInput } from './types';
 
 export type HTTPInfiniteResourceOptions<TData> = Omit<
   SWRInfiniteConfigInterface<TData, Error>,
-  'fetcher' | 'suspense'
+  'fetcher'
 >;
 
 export type HTTPInfiniteResourceParamFactory<
