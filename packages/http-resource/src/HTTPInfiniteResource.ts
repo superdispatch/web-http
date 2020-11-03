@@ -22,10 +22,13 @@ export type HTTPInfiniteResourceParamFactory<
   TParams extends URITemplateParams = URITemplateParams
 > = (index: number, prev: TData | null) => null | HTTPEndpointParams<TParams>;
 
-export type HTTPInfiniteResource<TData> = SWRInfiniteResponseInterface<
-  TData,
-  Error
->;
+export interface HTTPInfiniteResource<TData>
+  extends Omit<SWRInfiniteResponseInterface<TData, Error>, 'mutate'> {
+  mutate: (
+    updater: (currentValue: TData[] | undefined) => TData[] | undefined,
+    shouldRevalidate?: boolean,
+  ) => Promise<TData[] | undefined>;
+}
 
 export function useHTTPInfiniteResource<
   TData,
@@ -58,5 +61,5 @@ export function useHTTPInfiniteResource<
       return fetcher(`${method} ${url}`, options);
     },
     resourceOptions,
-  );
+  ) as HTTPInfiniteResource<TData>;
 }

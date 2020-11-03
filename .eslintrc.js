@@ -32,7 +32,7 @@ module.exports = {
         'import/no-internal-modules': [
           'error',
           {
-            allow: ['**/packages/*/src/**', 'dequal/lite'],
+            allow: ['**/packages/*/src/**', 'dequal/lite', 'swr/esm/types'],
           },
         ],
       },
