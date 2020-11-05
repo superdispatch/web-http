@@ -16,6 +16,11 @@ module.exports = {
       parserOptions: {
         project: './tsconfig.json',
       },
+      settings: {
+        react: {
+          version: 'detect',
+        },
+      },
       rules: {
         'eslint-comments/no-use': [
           'error',
