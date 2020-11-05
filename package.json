@@ -18,7 +18,7 @@
     "release": "lerna publish",
     "size": "yarn build && size-limit",
     "tdd": "jest --watch",
-    "test": "jest --coverage"
+    "test": "jest --coverage --forceExit"
   },
   "husky": {
     "hooks": {
