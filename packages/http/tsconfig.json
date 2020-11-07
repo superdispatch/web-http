@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.build.json",
   "exclude": ["pkg", "**/__tests__/**", "**/__testutils__/**"],
+  "references": [{ "path": "../uri" }],
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",

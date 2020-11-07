@@ -1,9 +1,7 @@
+import { URITemplateParams } from '@superdispatch/uri';
+
 import { HTTPError } from './HTTPError';
-import {
-  HTTPEndpointOptions,
-  parseHTTPEndpoint,
-} from './utils/parseHTTPEndpoint';
-import { URITemplateParams } from './utils/parseURITemplate';
+import { HTTPEndpointOptions, parseHTTPEndpoint } from './parseHTTPEndpoint';
 
 export interface HTTPRequestOptions extends HTTPEndpointOptions {
   signal?: AbortSignal;

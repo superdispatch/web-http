@@ -1,8 +1,5 @@
-import {
-  HTTPEndpointOptions,
-  HTTPEndpointParams,
-  URITemplateParams,
-} from '@superdispatch/http';
+import { HTTPEndpointOptions, HTTPEndpointParams } from '@superdispatch/http';
+import { URITemplateParams } from '@superdispatch/uri';
 import {
   SWRInfiniteConfigInterface,
   SWRInfiniteResponseInterface,

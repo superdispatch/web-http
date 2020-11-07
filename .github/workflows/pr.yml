@@ -1,9 +1,6 @@
 name: PR
 
-on:
-  pull_request:
-    branches:
-      - '**'
+on: pull_request
 
 jobs:
   checks:
@@ -15,14 +12,8 @@ jobs:
           access_token: ${{ github.token }}
 
       - uses: actions/checkout@v2
-
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12.x
-
       - id: yarn-cache
         run: echo "::set-output name=dir::$(yarn cache dir)"
-
       - uses: actions/cache@v1
         with:
           path: ${{ steps.yarn-cache.outputs.dir }}
@@ -35,8 +26,22 @@ jobs:
       - run: yarn lint
       - run: yarn test
       - uses: codecov/codecov-action@v1
-      - run: yarn build
-      - uses: andresz1/size-limit-action@v1
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - uses: actions/cache@v1
         with:
-          skip_step: build
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - uses: superdispatch/actions/build-size/limit@v1
+        with:
+          install_command: 'yarn install'
+          build_command: 'yarn build'

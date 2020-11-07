@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { cloneDeep } from 'lodash';
 import { cache } from 'swr';
 
-import { useHTTPResource } from '../HTTPResource';
+import { useHTTPResource } from './HTTPResource';
 
 let fetcher: jest.Mock;
 

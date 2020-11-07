@@ -5,8 +5,8 @@ import {
   clearHTTPResourceCache,
   mutateHTTPResource,
   revalidateHTTPResource,
-} from '../HTTPCache';
-import { useHTTPResource } from '../HTTPResource';
+} from './HTTPCache';
+import { useHTTPResource } from './HTTPResource';
 
 let fetcher: jest.Mock;
 
