@@ -1,4 +1,4 @@
-import { parseHTTPEndpoint } from '../parseHTTPEndpoint';
+import { parseHTTPEndpoint } from './parseHTTPEndpoint';
 
 test('basic', () => {
   expect(

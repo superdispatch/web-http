@@ -1,4 +1,4 @@
-import { parseURITemplate, URITemplateParams } from './parseURITemplate';
+import { parseURITemplate, URITemplateParams } from '@superdispatch/uri';
 
 const DEFAULT_METHOD = 'GET';
 const METHOD_PATTERN = /^([\w]+) (.+)/;

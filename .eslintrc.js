@@ -44,7 +44,7 @@ module.exports = {
     },
 
     {
-      files: ['**/{__tests__,__testutils__}/**/*.{ts,tsx}'],
+      files: ['**/*.spec.{ts,tsx}', '**/__testutils__/**/*.{ts,tsx}'],
       extends: ['plugin:@superdispatch/jest'],
       rules: {
         quotes: 'off',

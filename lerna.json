@@ -13,6 +13,7 @@
   },
   "ignoreChanges": [
     "**/pkg/**",
+    "**/*.spec.*",
     "**/__tests__/**"
   ]
 }

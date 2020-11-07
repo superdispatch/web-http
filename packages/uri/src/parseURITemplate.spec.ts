@@ -2,7 +2,7 @@ import extended from 'uritemplate-test/extended-tests.json';
 import examplesBySection from 'uritemplate-test/spec-examples-by-section.json';
 import examples from 'uritemplate-test/spec-examples.json';
 
-import { parseURITemplate } from '../parseURITemplate';
+import { parseURITemplate } from './parseURITemplate';
 
 const specs = [
   ['Examples', examples],
