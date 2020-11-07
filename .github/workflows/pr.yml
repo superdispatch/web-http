@@ -20,8 +20,8 @@ jobs:
           key: yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             yarn-
-
       - run: yarn install --frozen-lockfile
+
       - run: yarn tsc
       - run: yarn lint
       - run: yarn test
