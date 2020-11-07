@@ -1,5 +1,5 @@
 import { useDeepEqualMemo } from '@superdispatch/hooks';
-import { URITemplateParams } from '@superdispatch/http';
+import { URITemplateParams } from '@superdispatch/uri';
 import useSWR, {
   ConfigInterface as SWRConfigInterface,
   responseInterface as SWRResponseInterface,

@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  main:
+  checks:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,10 +29,38 @@ jobs:
           key: yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             yarn-
-
       - run: yarn install --frozen-lockfile
+
       - run: yarn tsc
       - run: yarn lint
       - run: yarn test
       - uses: codecov/codecov-action@v1
-      - run: yarn build
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: styfle/cancel-workflow-action@0.4.0
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+      - run: yarn install --frozen-lockfile
+
+      - uses: andresz1/size-limit-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}

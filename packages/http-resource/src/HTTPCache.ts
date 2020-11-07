@@ -1,4 +1,4 @@
-import { URITemplateParams } from '@superdispatch/http';
+import { URITemplateParams } from '@superdispatch/uri';
 import { cache, mutate as mutateSWR } from 'swr';
 
 import { inputToKey } from './internal/utils';

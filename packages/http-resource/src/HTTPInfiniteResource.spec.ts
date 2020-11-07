@@ -4,8 +4,8 @@ import { cache } from 'swr';
 import {
   HTTPInfiniteResourceParamFactory,
   useHTTPInfiniteResource,
-} from '../HTTPInfiniteResource';
-import { HTTPResourceFetcherArgs, HTTPResourceInput } from '../types';
+} from './HTTPInfiniteResource';
+import { HTTPResourceFetcherArgs, HTTPResourceInput } from './types';
 
 let fetcher: jest.Mock;
 

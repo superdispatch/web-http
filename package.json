@@ -44,6 +44,7 @@
     ],
     "resetMocks": true,
     "roots": [
+      "<rootDir>/packages/uri/",
       "<rootDir>/packages/http/",
       "<rootDir>/packages/http-resource/"
     ],
@@ -98,9 +99,20 @@
   "resetMocks": true,
   "size-limit": [
     {
+      "path": "packages/uri/pkg/dist-web/index.js"
+    },
+    {
+      "ignore": [
+        "@superdispatch/uri"
+      ],
       "path": "packages/http/pkg/dist-web/index.js"
     },
     {
+      "ignore": [
+        "react",
+        "@superdispatch/uri",
+        "@superdispatch/http"
+      ],
       "path": "packages/http-resource/pkg/dist-web/index.js"
     }
   ]

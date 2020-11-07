@@ -1,4 +1,5 @@
-import { HTTPEndpointParams, URITemplateParams } from '@superdispatch/http';
+import { HTTPEndpointParams } from '@superdispatch/http';
+import { URITemplateParams } from '@superdispatch/uri';
 
 export type HTTPResourceKeyOption = bigint | boolean | null | number | string;
 
