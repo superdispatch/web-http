@@ -1,6 +1,10 @@
 import { normalizeURL } from './normalizeURL';
 
 test.each([
+  [' ', undefined],
+  [null, undefined],
+  [undefined, undefined],
+
   ['foo.com', 'http://foo.com/'],
   ['Foo.com', 'http://foo.com/'],
   ['foo.com ', 'http://foo.com/'],

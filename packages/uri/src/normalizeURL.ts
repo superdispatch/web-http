@@ -3,26 +3,34 @@ export interface NormalizeURLOptions {
 }
 
 export function normalizeURL(
-  input: string,
+  input: unknown,
   { defaultProtocol = 'http' }: NormalizeURLOptions = {},
-): string {
-  input = input.trim();
+): string | undefined {
+  if (typeof input != 'string') {
+    return undefined;
+  }
+
+  let inputString = input.trim();
+
+  if (inputString.length === 0) {
+    return undefined;
+  }
 
   // Relative protocol "//foo.bar"
-  if (input.startsWith('//')) {
-    input = `${defaultProtocol}:${input}`;
+  if (inputString.startsWith('//')) {
+    inputString = `${defaultProtocol}:${inputString}`;
   }
   // Without protocol "foo.bar"
-  else if (!/^\w+:\/\//.exec(input)) {
-    input = `${defaultProtocol}://${input}`;
+  else if (!/^\w+:\/\//.exec(inputString)) {
+    inputString = `${defaultProtocol}://${inputString}`;
   }
 
   let url: URL;
 
   try {
-    url = new URL(input);
+    url = new URL(inputString);
   } catch {
-    return input;
+    return inputString;
   }
 
   if (url.pathname) {
