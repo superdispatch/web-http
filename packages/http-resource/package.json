@@ -1,6 +1,6 @@
 {
   "name": "@superdispatch/http-resource",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/superdispatch/ui.git"
@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@superdispatch/hooks": "^0.6.0",
-    "@superdispatch/http": "^0.1.1",
-    "@superdispatch/uri": "^0.1.1",
+    "@superdispatch/http": "^0.1.2",
+    "@superdispatch/uri": "^0.1.2",
     "swr": "^0.3.8"
   },
   "peerDependencies": {
