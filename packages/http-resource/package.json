@@ -13,13 +13,13 @@
     "version": "pika build"
   },
   "dependencies": {
-    "@babel/runtime": "^7.12.5",
     "@superdispatch/hooks": "^0.6.0",
     "@superdispatch/http": "^0.1.1",
     "@superdispatch/uri": "^0.1.1",
     "swr": "^0.3.8"
   },
   "peerDependencies": {
+    "@babel/runtime": "^7.0.0",
     "react": "^16.13.0"
   },
   "publishConfig": {
