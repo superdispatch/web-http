@@ -2372,10 +2372,10 @@
   dependencies:
     dequal "^2.0.2"
 
-"@superdispatch/js-tools@^0.2.19":
-  version "0.2.19"
-  resolved "https://registry.yarnpkg.com/@superdispatch/js-tools/-/js-tools-0.2.19.tgz#4196fb82bf90c7d655e47afaeaa0b83756ca8fc8"
-  integrity sha512-p//0QctQA2ezBkbl4icPIRub9gcYi/z9n6bbFBOL1sZsGfNFU0W2343kj7L2k3UZndBs/28CNuxPptlXfrvCRA==
+"@superdispatch/js-tools@^0.2.22":
+  version "0.2.22"
+  resolved "https://registry.yarnpkg.com/@superdispatch/js-tools/-/js-tools-0.2.22.tgz#970af0fb3140479e07ba4278f801067367ea1ba6"
+  integrity sha512-XI7U8ZxEss3cYbwuQ3U1bHc4hASHVznNAFq3RFZALNn1UadpWNmZma+hwqfIgqLFDqEfysAQS106r9HlyFSQSw==
   dependencies:
     "@oclif/command" "^1.8.0"
     "@oclif/config" "^1.17.0"

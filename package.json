@@ -69,7 +69,7 @@
     "@size-limit/preset-small-lib": "^4.7.0",
     "@superdispatch/babel-preset": "^0.2.18",
     "@superdispatch/eslint-plugin": "^0.2.18",
-    "@superdispatch/js-tools": "^0.2.19",
+    "@superdispatch/js-tools": "^0.2.22",
     "@superdispatch/prettier-config": "^0.2.17",
     "@superdispatch/tsconfig": "^0.2.17",
     "@testing-library/react-hooks": "^3.4.2",
