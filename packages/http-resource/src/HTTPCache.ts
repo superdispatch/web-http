@@ -15,7 +15,7 @@ export function mutateHTTPResource<
   TParams extends URITemplateParams = URITemplateParams
 >(
   input: HTTPResourceInput<TParams>,
-  fn: (prev: TData) => TData,
+  fn: (prev?: TData) => TData | undefined,
   shouldRevalidate?: boolean,
 ) {
   return mutateSWR(inputToKey(input), fn, shouldRevalidate) as Promise<void>;

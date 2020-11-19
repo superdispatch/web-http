@@ -81,7 +81,7 @@ test('mutation', async () => {
 
   void mutateHTTPResource<any[]>(
     ['/users/{id}', { id: 1 }],
-    (prev) => [...prev, { foo: 'bar' }],
+    (prev = []) => [...prev, { foo: 'bar' }],
     false,
   );
 
@@ -101,7 +101,7 @@ test('mutation', async () => {
 
   void mutateHTTPResource<any[]>(
     ['/users/{id}', { id: 1 }],
-    (prev) => [...prev, { bar: 'baz' }],
+    (prev = []) => [...prev, { bar: 'baz' }],
     true,
   );
 
