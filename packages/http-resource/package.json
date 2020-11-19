@@ -16,7 +16,7 @@
     "@superdispatch/hooks": "^0.6.0",
     "@superdispatch/http": "^0.1.2",
     "@superdispatch/uri": "^0.1.2",
-    "swr": "^0.3.8"
+    "swr": "^0.3.9"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.0.0",
