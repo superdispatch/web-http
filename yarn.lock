@@ -2325,10 +2325,10 @@
     webpack "^4.44.1"
     webpack-bundle-analyzer "^3.9.0"
 
-"@superdispatch/babel-preset@^0.2.18":
-  version "0.2.18"
-  resolved "https://registry.yarnpkg.com/@superdispatch/babel-preset/-/babel-preset-0.2.18.tgz#f6a5563351915a84c74a159d03473085b3cbd95e"
-  integrity sha512-RYs5YjpEBIdCksnupASRmQn+GGlZHR7B3PgGPDys7VTT45DyGTFfRDtmbea+Lw0E3apNGzhl7joGoZeKKh9wYA==
+"@superdispatch/babel-preset@^0.2.22":
+  version "0.2.22"
+  resolved "https://registry.yarnpkg.com/@superdispatch/babel-preset/-/babel-preset-0.2.22.tgz#bb407b6f38b1e42ad46b39192e78cb041ac55736"
+  integrity sha512-IS2a7jWWJtxBLI/U16gGYnSNh1DGRqMkLvj8WtcCo9VLtHiHxGNVJeJwxjlPR7LtpUY4r3cR8GGEQnFBuJ4MOQ==
   dependencies:
     "@babel/core" "^7.12.1"
     "@babel/plugin-proposal-class-properties" "^7.12.1"
@@ -2342,10 +2342,10 @@
     babel-plugin-dev-expression "^0.2.2"
     babel-plugin-transform-react-remove-prop-types "^0.4.24"
 
-"@superdispatch/eslint-plugin@^0.2.18":
-  version "0.2.18"
-  resolved "https://registry.yarnpkg.com/@superdispatch/eslint-plugin/-/eslint-plugin-0.2.18.tgz#2ab1b4547ad822f5c0a9503ac10138abfce90088"
-  integrity sha512-t38WvLWGVTBEmbPntwZhkg7SDClJnm6BjYr4E7tohzpKIQCnO0RzVW0BWdi07npr7Jbs8kPb80gbM5RqRLbRHw==
+"@superdispatch/eslint-plugin@^0.2.22":
+  version "0.2.22"
+  resolved "https://registry.yarnpkg.com/@superdispatch/eslint-plugin/-/eslint-plugin-0.2.22.tgz#68332e0e31ed0cd00f767625c2f9feb034a1dd6b"
+  integrity sha512-mfqNmQijs8SPTPvPhcOg2YPwuOdIWsNLHtkMCozpj9/rdCz8LmqA2FjY7CkG5ukE5GJArT79EQm+QZBjbcWaKg==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^4.7.0"
     "@typescript-eslint/parser" "^4.7.0"
@@ -2372,10 +2372,10 @@
   dependencies:
     dequal "^2.0.2"
 
-"@superdispatch/js-tools@^0.2.19":
-  version "0.2.19"
-  resolved "https://registry.yarnpkg.com/@superdispatch/js-tools/-/js-tools-0.2.19.tgz#4196fb82bf90c7d655e47afaeaa0b83756ca8fc8"
-  integrity sha512-p//0QctQA2ezBkbl4icPIRub9gcYi/z9n6bbFBOL1sZsGfNFU0W2343kj7L2k3UZndBs/28CNuxPptlXfrvCRA==
+"@superdispatch/js-tools@^0.2.22":
+  version "0.2.22"
+  resolved "https://registry.yarnpkg.com/@superdispatch/js-tools/-/js-tools-0.2.22.tgz#970af0fb3140479e07ba4278f801067367ea1ba6"
+  integrity sha512-XI7U8ZxEss3cYbwuQ3U1bHc4hASHVznNAFq3RFZALNn1UadpWNmZma+hwqfIgqLFDqEfysAQS106r9HlyFSQSw==
   dependencies:
     "@oclif/command" "^1.8.0"
     "@oclif/config" "^1.17.0"
@@ -2385,15 +2385,15 @@
     listr "^0.14.3"
     yarn-deduplicate "^3.1.0"
 
-"@superdispatch/prettier-config@^0.2.17":
-  version "0.2.17"
-  resolved "https://registry.yarnpkg.com/@superdispatch/prettier-config/-/prettier-config-0.2.17.tgz#7bcc9e7e222d25ec6b29223b7c08d6565b5c979f"
-  integrity sha512-+rQTbNIylxdFP6Lw5HeBUyWbPKNns6CzDT6egU/MkwVMaNn9fNfxHu7hd0XNVbe8DjN+jA7lel8Z0Z8G5pYH4g==
+"@superdispatch/prettier-config@^0.2.22":
+  version "0.2.22"
+  resolved "https://registry.yarnpkg.com/@superdispatch/prettier-config/-/prettier-config-0.2.22.tgz#51cfd73c05346146bdf4528dad516df259fc1866"
+  integrity sha512-f+PcUlEi4WYNyFkOkLlyUBCQnKDqz3ANErmcK823GMjU7mjj0K0pp1DR3fsQoy+YzC7vCBKBptEgUtm4GfKEZg==
 
-"@superdispatch/tsconfig@^0.2.17":
-  version "0.2.17"
-  resolved "https://registry.yarnpkg.com/@superdispatch/tsconfig/-/tsconfig-0.2.17.tgz#118002d39322c80f504e7582d0db8380d8a91ab6"
-  integrity sha512-yIuDW55KT2bIPByzEYCWDf7f8y+vKTtUHExQ9j06gRJssFJMc50V203vyEtzleYdSYnh5n72bSZGZL2gBLSIxw==
+"@superdispatch/tsconfig@^0.2.22":
+  version "0.2.22"
+  resolved "https://registry.yarnpkg.com/@superdispatch/tsconfig/-/tsconfig-0.2.22.tgz#ec709185e9ec742af591bfa1cb661eb69381075d"
+  integrity sha512-Tp+uR23RGq+HEP7QkwyosZL/2/0Uzp71wisCtbm1jT8l9RQozkgJDgH/XMXJ9cuAx2PE5T10QitVaKNxXuPzEA==
 
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
@@ -11727,10 +11727,10 @@ svgo@^1.0.0:
     unquote "~1.1.1"
     util.promisify "~1.0.0"
 
-swr@^0.3.8:
-  version "0.3.8"
-  resolved "https://registry.yarnpkg.com/swr/-/swr-0.3.8.tgz#b3c3c7fa278913d22dbe1f3f28c07df9da9be944"
-  integrity sha512-EHRlaqoBtHsB2wOB+dQJ74DrZvaRGu4BaIQrhkD+/rj8/UGo2iQXN+rCcYnV7/VAreBJBmm9+lDkwZmUqWEkKA==
+swr@^0.3.9:
+  version "0.3.9"
+  resolved "https://registry.yarnpkg.com/swr/-/swr-0.3.9.tgz#a179a795244c7b68684af6a632f1ad579e6a69e0"
+  integrity sha512-lyN4SjBzpoW4+v3ebT7JUtpzf9XyzrFwXIFv+E8ZblvMa5enSNaUBs4EPkL8gGA/GDMLngEmB53o5LaNboAPfg==
   dependencies:
     dequal "2.0.2"
 
