@@ -13,7 +13,7 @@
     "version": "pika build"
   },
   "dependencies": {
-    "@superdispatch/hooks": "^0.6.0",
+    "@superdispatch/hooks": "^0.7.0",
     "@superdispatch/http": "^0.1.2",
     "@superdispatch/uri": "^0.1.2",
     "swr": "^0.3.9"

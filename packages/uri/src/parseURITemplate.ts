@@ -23,9 +23,9 @@ interface OperatorConfig {
   skipEmptyAssignment?: boolean;
 }
 
-const configOverrides: Readonly<Partial<
-  Record<Operator, Partial<OperatorConfig>>
->> = {
+const configOverrides: Readonly<
+  Partial<Record<Operator, Partial<OperatorConfig>>>
+> = {
   '+': { prefix: '', skipEncoding: true },
   '#': { skipEncoding: true },
   '.': { separator: '.' },

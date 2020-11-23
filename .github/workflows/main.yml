@@ -24,7 +24,6 @@ jobs:
           restore-keys: |
             yarn-
       - run: yarn install --frozen-lockfile
-
       - run: yarn tsc
       - run: yarn lint
       - run: yarn test
