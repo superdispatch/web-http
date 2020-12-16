@@ -17,7 +17,7 @@ export type HTTPResourceFetcher<
 
 export type HTTPResourceFetcherArgs<
   TParams extends URITemplateParams
-> = Parameters<HTTPResourceFetcher<unknown, TParams>>;
+> = readonly [template: string, options?: HTTPResourceFetcherOptions<TParams>];
 
 export type HTTPResourceInput<TParams extends URITemplateParams> =
   | string

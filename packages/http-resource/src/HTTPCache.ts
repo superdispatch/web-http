@@ -24,3 +24,10 @@ export function mutateHTTPResource<
 export function clearHTTPResourceCache() {
   cache.clear();
 }
+
+export function readCachedHTTPResource<
+  TData,
+  TParams extends URITemplateParams = URITemplateParams
+>(input: HTTPResourceInput<TParams>): TData | undefined {
+  return cache.get(inputToKey(input)) as TData | undefined;
+}

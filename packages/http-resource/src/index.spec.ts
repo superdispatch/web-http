@@ -5,6 +5,7 @@ test('public api', () => {
     Object {
       "clearHTTPResourceCache": [Function],
       "mutateHTTPResource": [Function],
+      "readCachedHTTPResource": [Function],
       "revalidateHTTPResource": [Function],
       "useHTTPInfiniteResource": [Function],
       "useHTTPResource": [Function],
