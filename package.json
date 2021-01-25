@@ -90,6 +90,7 @@
     "react": "^17.0.1",
     "react-test-renderer": "^17.0.1",
     "size-limit": "^4.9.0",
+    "swr": "^0.4.0",
     "typescript": "~4.1.2",
     "uritemplate-test": "https://github.com/uri-templates/uritemplate-test#520fdd8b0f78779d12178c357a986e0e727f4bd0"
   },
