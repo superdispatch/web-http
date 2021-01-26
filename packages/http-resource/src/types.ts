@@ -3,9 +3,9 @@ import { URITemplateParams } from '@superdispatch/uri';
 
 export type HTTPResourceKeyOption = bigint | boolean | null | number | string;
 
-export type HTTPResourceFetcherOptions<TParams> = HTTPEndpointParams<
-  { key?: HTTPResourceKeyOption } & TParams
->;
+export type HTTPResourceFetcherOptions<
+  TParams extends URITemplateParams = URITemplateParams
+> = HTTPEndpointParams<{ key?: HTTPResourceKeyOption } & TParams>;
 
 export type HTTPResourceFetcher<
   TData,
@@ -16,12 +16,12 @@ export type HTTPResourceFetcher<
 ) => Promise<TData>;
 
 export type HTTPResourceFetcherArgs<
-  TParams extends URITemplateParams
+  TParams extends URITemplateParams = URITemplateParams
 > = readonly [template: string, options?: HTTPResourceFetcherOptions<TParams>];
 
-export type HTTPResourceInput<TParams extends URITemplateParams> =
-  | string
-  | HTTPResourceFetcherArgs<TParams>;
+export type HTTPResourceInput<
+  TParams extends URITemplateParams = URITemplateParams
+> = string | HTTPResourceFetcherArgs<TParams>;
 
 export type HTTPResourceKey = [
   method: string,
