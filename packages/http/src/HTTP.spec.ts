@@ -1,5 +1,4 @@
 import { Response } from 'node-fetch';
-
 import { createHTTP } from './HTTP';
 import { HTTPError } from './HTTPError';
 

@@ -1,6 +1,5 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { cache } from 'swr';
-
 import {
   clearHTTPResourceCache,
   mutateHTTPResource,
@@ -9,14 +8,15 @@ import {
 } from './HTTPCache';
 import { useHTTPResource } from './HTTPResource';
 
-let fetcher: jest.Mock;
+const fetcher = (...args: any[]) =>
+  new Promise((resolve) =>
+    setTimeout(() => {
+      resolve(args);
+    }, 100),
+  );
 
 beforeEach(() => {
   cache.clear();
-  fetcher = jest.fn(
-    (...args: any[]) =>
-      new Promise((resolve) => setTimeout(() => resolve(args), 100)),
-  );
 });
 
 test('revalidation', async () => {
@@ -39,7 +39,7 @@ test('revalidation', async () => {
     data: ['/users/{id}', { id: 1 }],
   });
 
-  void act(() => {
+  act(() => {
     void revalidateHTTPResource(['/users/{id}', { id: 1 }]);
   });
 
@@ -80,31 +80,27 @@ test('mutation', async () => {
     });
   });
 
-  void mutateHTTPResource<any[]>(
-    ['/users/{id}', { id: 1 }],
-    (prev = []) => [...prev, { foo: 'bar' }],
-    false,
-  );
+  act(() => {
+    void mutateHTTPResource<any[]>(
+      ['/users/{id}', { id: 1 }],
+      (prev = []) => [...prev, { foo: 'bar' }],
+      false,
+    );
+  });
 
   expect(result.current).toMatchObject({
     error: undefined,
     isValidating: false,
-    data: ['/users/{id}', { id: 1 }],
+    data: ['/users/{id}', { id: 1 }, { foo: 'bar' }],
   });
 
-  await waitFor(() => {
-    expect(result.current).toMatchObject({
-      error: undefined,
-      isValidating: false,
-      data: ['/users/{id}', { id: 1 }, { foo: 'bar' }],
-    });
+  act(() => {
+    void mutateHTTPResource<any[]>(
+      ['/users/{id}', { id: 1 }],
+      (prev = []) => [...prev, { bar: 'baz' }],
+      true,
+    );
   });
-
-  void mutateHTTPResource<any[]>(
-    ['/users/{id}', { id: 1 }],
-    (prev = []) => [...prev, { bar: 'baz' }],
-    true,
-  );
 
   // It should asynchronously update value in cache first.
   await waitFor(() => {

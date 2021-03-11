@@ -1,6 +1,5 @@
 import { parseHTTPEndpoint } from '@superdispatch/http';
 import { URITemplateParams } from '@superdispatch/uri';
-
 import {
   HTTPResourceFetcherArgs,
   HTTPResourceFetcherOptions,

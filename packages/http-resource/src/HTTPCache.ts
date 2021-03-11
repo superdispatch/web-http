@@ -1,13 +1,12 @@
 import { URITemplateParams } from '@superdispatch/uri';
 import { cache, mutate as mutateSWR } from 'swr';
-
 import { inputToKey } from './internal/utils';
 import { HTTPResourceInput } from './types';
 
 export function revalidateHTTPResource<TParams extends URITemplateParams>(
   input: HTTPResourceInput<TParams>,
 ): Promise<void> {
-  return mutateSWR(inputToKey(input)) as Promise<void>;
+  return mutateSWR(inputToKey(input)).then(() => void 0);
 }
 
 export function mutateHTTPResource<

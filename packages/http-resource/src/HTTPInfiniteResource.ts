@@ -1,16 +1,15 @@
 import { HTTPEndpointOptions, HTTPEndpointParams } from '@superdispatch/http';
 import { URITemplateParams } from '@superdispatch/uri';
 import {
-  SWRInfiniteConfigInterface,
-  SWRInfiniteResponseInterface,
+  SWRInfiniteConfiguration,
+  SWRInfiniteResponse,
   useSWRInfinite,
 } from 'swr';
-
 import { argsToKey, inputToArgs } from './internal/utils';
 import { HTTPResourceFetcher, HTTPResourceInput } from './types';
 
-export type HTTPInfiniteResourceOptions<TData> = Omit<
-  SWRInfiniteConfigInterface<TData, Error>,
+export type HTTPInfiniteResourceOptions<TData, TError = Error> = Omit<
+  SWRInfiniteConfiguration<TData, TError>,
   'fetcher'
 >;
 
@@ -19,26 +18,24 @@ export type HTTPInfiniteResourceParamFactory<
   TParams extends URITemplateParams = URITemplateParams
 > = (index: number, prev: TData | null) => null | HTTPEndpointParams<TParams>;
 
-export interface HTTPInfiniteResource<TData>
-  extends Omit<SWRInfiniteResponseInterface<TData, Error>, 'mutate'> {
-  mutate: (
-    updater: (currentValue: TData[] | undefined) => TData[] | undefined,
-    shouldRevalidate?: boolean,
-  ) => Promise<TData[] | undefined>;
-}
+export type HTTPInfiniteResource<TData, TError = Error> = Omit<
+  SWRInfiniteResponse<TData, TError>,
+  'mutate'
+>;
 
 export function useHTTPInfiniteResource<
   TData,
-  TParams extends URITemplateParams = URITemplateParams
+  TParams extends URITemplateParams = URITemplateParams,
+  TError = Error
 >(
   input: HTTPResourceInput<TParams>,
   makeParams: HTTPInfiniteResourceParamFactory<TData, TParams>,
   fetcher: HTTPResourceFetcher<TData>,
-  resourceOptions?: HTTPInfiniteResourceOptions<TData>,
-): HTTPInfiniteResource<TData> {
+  resourceOptions?: HTTPInfiniteResourceOptions<TData, TError>,
+): HTTPInfiniteResource<TData, TError> {
   const [template, baseParams] = inputToArgs(input);
 
-  return useSWRInfinite<TData, Error>(
+  return useSWRInfinite<TData, TError>(
     (index, prev) => {
       const params = makeParams(index, prev);
 
@@ -58,5 +55,5 @@ export function useHTTPInfiniteResource<
       return fetcher(`${method} ${url}`, options);
     },
     resourceOptions,
-  ) as HTTPInfiniteResource<TData>;
+  );
 }

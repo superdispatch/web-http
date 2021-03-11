@@ -1,21 +1,20 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { cache } from 'swr';
-
 import {
   HTTPInfiniteResourceParamFactory,
   useHTTPInfiniteResource,
 } from './HTTPInfiniteResource';
 import { HTTPResourceFetcherArgs, HTTPResourceInput } from './types';
 
-let fetcher: jest.Mock;
+const fetcher = (...args: any[]) =>
+  new Promise((resolve) =>
+    setTimeout(() => {
+      resolve(args);
+    }, 100),
+  );
 
 beforeEach(() => {
   cache.clear();
-
-  fetcher = jest.fn(
-    (...args: any[]) =>
-      new Promise((resolve) => setTimeout(() => resolve(args), 100)),
-  );
 });
 
 test('basic', async () => {
@@ -182,18 +181,9 @@ test.each<
   });
 
   for (let size = 2; size <= 5; size++) {
-    void act(() => {
+    act(() => {
       void result.current.setSize(size);
     });
-
-    expect(result.current).toMatchObject({
-      size,
-      error: undefined,
-      isValidating: false,
-      data: args.slice(0, size - 1),
-    });
-
-    await waitForValueToChange(() => result.current.isValidating);
 
     expect(result.current).toMatchObject({
       size,

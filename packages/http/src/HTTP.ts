@@ -1,5 +1,4 @@
 import { URITemplateParams } from '@superdispatch/uri';
-
 import { HTTPError } from './HTTPError';
 import { HTTPEndpointOptions, parseHTTPEndpoint } from './parseHTTPEndpoint';
 

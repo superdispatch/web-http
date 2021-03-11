@@ -1,7 +1,6 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { cloneDeep } from 'lodash';
 import { cache } from 'swr';
-
 import { useHTTPResource } from './HTTPResource';
 
 let fetcher: jest.Mock;
@@ -10,7 +9,11 @@ beforeEach(() => {
   cache.clear();
   fetcher = jest.fn(
     (...args: any[]) =>
-      new Promise((resolve) => setTimeout(() => resolve(args), 100)),
+      new Promise((resolve) =>
+        setTimeout(() => {
+          resolve(args);
+        }, 100),
+      ),
   );
 });
 
