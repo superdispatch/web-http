@@ -30,7 +30,7 @@ test('basic', async () => {
 
   await expect(requestJSON('/users')).resolves.toEqual({
     input: '/users',
-    init: { headers: {}, method: 'GET' },
+    init: { method: 'GET' },
   });
 });
 
@@ -44,7 +44,7 @@ test('error', async () => {
   const errorMatcher = {
     name: 'HTTPError',
     message: 'Unauthorized',
-    endpoint: { url: '/users', method: 'GET', headers: {} },
+    endpoint: { url: '/users', method: 'GET' },
     response: { ok: false, status: 401, statusText: 'Unauthorized' },
   };
 
@@ -67,7 +67,7 @@ test('unknown error status code', async () => {
   const errorMatcher = {
     name: 'HTTPError',
     message: '999',
-    endpoint: { url: '/users', method: 'GET', headers: {} },
+    endpoint: { url: '/users', method: 'GET' },
     response: { ok: false, status: 999, statusText: undefined },
   };
 
@@ -142,31 +142,49 @@ test.each([
 
 test.each([
   [undefined, undefined, {}],
-  [{ authorization: 'Token foo' }, undefined, { authorization: 'Token foo' }],
-  [undefined, { Authorization: 'Token bar' }, { Authorization: 'Token bar' }],
+  [
+    { authorization: 'Token foo' },
+    undefined,
+    { headers: { authorization: 'Token foo' } },
+  ],
+  [
+    undefined,
+    { Authorization: 'Token bar' },
+    { headers: { Authorization: 'Token bar' } },
+  ],
   [
     { authorization: 'Token foo' },
     { Authorization: 'Token bar' },
-    { authorization: 'Token foo', Authorization: 'Token bar' },
+    { headers: { authorization: 'Token foo', Authorization: 'Token bar' } },
   ],
   [
     { authorization: 'Token foo' },
     { authorization: 'Token bar' },
-    { authorization: 'Token bar' },
+    { headers: { authorization: 'Token bar' } },
+  ],
+
+  [
+    (headers: any) => ({
+      ...headers,
+      'content-type': [headers?.['content-type'], 'charset=UTF-8']
+        .filter(Boolean)
+        .join('; '),
+    }),
+    { 'content-type': 'application/json' },
+    { headers: { 'content-type': 'application/json; charset=UTF-8' } },
   ],
 ])(
   'options.headers: %p + %p -> %p',
-  async (defaultHeaders, requestHeaders, headers) => {
+  async (defaultHeaders, requestHeaders, expected) => {
     const { request, requestJSON } = createHTTP({
       headers: defaultHeaders,
     });
 
     const response = await request('/users', { headers: requestHeaders });
-    await expect(response.json()).resolves.toMatchObject({ init: { headers } });
-
+    await expect(response.json()).resolves.toMatchObject({ init: expected });
     await expect(
       requestJSON('/users', { headers: requestHeaders }),
-    ).resolves.toMatchObject({ init: { headers } });
+    ).resolves.toMatchObject({ init: expected });
   },
 );
 
@@ -248,9 +266,9 @@ test('options.parseJSON', async () => {
 
   expect(parseJSON).toHaveBeenCalledTimes(1);
 
-  await expect(requestJSON('/users/{id}', { id: 1, parseJSON })).resolves.toBe(
-    '/users/1',
-  );
+  await expect(
+    requestJSON(['/users/{id}', { id: 1 }], { parseJSON }),
+  ).resolves.toBe('/users/1');
 
   expect(parseJSON).toHaveBeenCalledTimes(2);
 });

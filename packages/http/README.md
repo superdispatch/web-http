@@ -16,7 +16,7 @@ import { createHTTP } from '@superdispatch/http';
 
 export function createAPI(token: string | undefined) {
   return createHTTP({
-    baseURL: 'http://example.com',
+    baseURL: 'https://example.com',
     headers: !token ? undefined : { authorization: `Token ${token}` },
   });
 }
@@ -41,8 +41,7 @@ export function createUserAPI(token: string | undefined) {
       return requestJSON<{ items: User[]; count: number }>(
         // `{ status: 'active' }` -> `/users/active`
         // `{ status: 'inactive', q: 'foo' }` -> `/users/inactive?q=foo`
-        '/users/{status}{?q,page,page_size}',
-        { status, ...params },
+        ['/users/{status}{?params*}', { status, params }],
       );
     },
 
@@ -51,7 +50,7 @@ export function createUserAPI(token: string | undefined) {
         User,
         // It is possible to strongly type allowed URI Template params.
         { id: number }
-      >('/users/{id}', { id });
+      >(['/users/{id}', { id }]);
     },
 
     addUser(values: Pick<User, 'username' | 'fullName'>) {
@@ -64,9 +63,7 @@ export function createUserAPI(token: string | undefined) {
     },
 
     editUser(id: number, values: Pick<User, 'username' | 'fullName'>) {
-      return requestJSON<User, { id: number }>('PUT /users/{id}', {
-        // URI template variables will be extracted from the options.
-        id,
+      return requestJSON<User, { id: number }>(['PUT /users/{id}', { id }], {
         json: values,
       });
     },
@@ -74,7 +71,7 @@ export function createUserAPI(token: string | undefined) {
     deleteUser(id: number): Promise<Response> {
       // When we do not care about response body we can use `request` method
       // directly.
-      return request<{ id: number }>('DELETE /users/{id}', { id });
+      return request<{ id: number }>(['DELETE /users/{id}', { id }]);
     },
   };
 }

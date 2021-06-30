@@ -1,4 +1,4 @@
-import { HTTPEndpoint } from './parseHTTPEndpoint';
+import { HTTPEndpoint } from './HTTPEndpoint';
 
 export class HTTPError extends Error {
   response: Response;

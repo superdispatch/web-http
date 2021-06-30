@@ -1,21 +1,17 @@
-import { parseHTTPEndpoint } from './parseHTTPEndpoint';
+import { parseHTTPEndpoint } from './HTTPEndpoint';
 
 test('basic', () => {
   expect(
-    parseHTTPEndpoint<{ id: number }>('/users/{id}/comments', { id: 1 }),
-  ).toEqual({
-    headers: {},
-    method: 'GET',
-    url: '/users/1/comments',
-  });
+    parseHTTPEndpoint<{ id: number }>(['/users/{id}/comments', { id: 1 }]),
+  ).toEqual({ method: 'GET', url: '/users/1/comments' });
 });
 
 test.each([
   ['/api', '/api/users'],
   ['/api/', '/api//users'],
-  ['http://example.com', 'http://example.com/users'],
-  ['http://example.com/api', 'http://example.com/api/users'],
-  ['http://example.com/api/v1', 'http://example.com/api/v1/users'],
+  ['https://example.com', 'https://example.com/users'],
+  ['https://example.com/api', 'https://example.com/api/users'],
+  ['https://example.com/api/v1', 'https://example.com/api/v1/users'],
 ])('baseURL: %p -> %p', (baseURL, result) => {
   expect(parseHTTPEndpoint('/users', { baseURL })).toMatchObject({
     url: result,
@@ -24,15 +20,21 @@ test.each([
 
 test.each([
   [undefined, {}],
-  [{ 'content-type': 'plain/text' }, { 'content-type': 'plain/text' }],
+  [
+    { 'content-type': 'plain/text' },
+    { headers: { 'content-type': 'plain/text' } },
+  ],
   [
     { 'content-type': 'plain/text', 'Content-Type': 'application/json' },
-    { 'content-type': 'plain/text', 'Content-Type': 'application/json' },
+    {
+      headers: {
+        'content-type': 'plain/text',
+        'Content-Type': 'application/json',
+      },
+    },
   ],
-])('header: %p -> %p', (headers, result) => {
-  expect(parseHTTPEndpoint('/users', { headers })).toMatchObject({
-    headers: result,
-  });
+])('header: %p -> %p', (headers, expected) => {
+  expect(parseHTTPEndpoint('/users', { headers })).toMatchObject(expected);
 });
 
 test.each([['text', 'text']])('body: %p -> %p', (body, result) => {
@@ -69,10 +71,10 @@ test.each([
   [{ page: 2, page_size: 5 }, '/users?page=2&page_size=5'],
 ])('query expansion: %p -> %p', (params, url) => {
   expect(
-    parseHTTPEndpoint<{ page?: number; page_size?: number }>(
+    parseHTTPEndpoint<{ page?: number; page_size?: number }>([
       '/users{?page,page_size}',
       params,
-    ),
+    ]),
   ).toMatchObject({ url });
 });
 
@@ -83,9 +85,9 @@ test.each([
   [{ page: 1, q: 'foo' }, '/users?page_size=10&q=foo&page=1'],
 ])('query continuation: %p -> %p', (params, url) => {
   expect(
-    parseHTTPEndpoint<{ page?: number; q?: string }>(
+    parseHTTPEndpoint<{ page?: number; q?: string }>([
       '/users?page_size=10{&q,page}',
       params,
-    ),
+    ]),
   ).toMatchObject({ url });
 });
