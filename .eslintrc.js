@@ -9,18 +9,9 @@ module.exports = {
 
     {
       files: '*.ts',
-      extends: [
-        'plugin:@superdispatch/react',
-        'plugin:@superdispatch/typescript',
-      ],
-      parserOptions: {
-        project: './tsconfig.json',
-      },
-      settings: {
-        react: {
-          version: 'detect',
-        },
-      },
+      extends: ['plugin:@superdispatch/typescript'],
+      parserOptions: { project: './tsconfig.json' },
+
       rules: {
         'eslint-comments/no-use': [
           'error',
@@ -44,7 +35,7 @@ module.exports = {
     },
 
     {
-      files: ['**/*.spec.{ts,tsx}', '**/__testutils__/**/*.{ts,tsx}'],
+      files: ['**/*.spec.ts', '**/__testutils__/**/*.ts'],
       extends: ['plugin:@superdispatch/ts-jest'],
       rules: {
         'import/no-internal-modules': 'off',

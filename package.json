@@ -40,8 +40,7 @@
     "resetMocks": true,
     "roots": [
       "<rootDir>/packages/uri/",
-      "<rootDir>/packages/http/",
-      "<rootDir>/packages/http-resource/"
+      "<rootDir>/packages/http/"
     ],
     "setupFilesAfterEnv": [
       "<rootDir>/setupTests.ts"
@@ -69,11 +68,8 @@
     "@superdispatch/js-tools": "^0.4.0",
     "@superdispatch/prettier-config": "^0.4.0",
     "@superdispatch/tsconfig": "^0.4.0",
-    "@testing-library/react-hooks": "^7.0.0",
     "@types/jest": "^26.0.23",
-    "@types/lodash": "^4.14.170",
     "@types/node-fetch": "^2.5.10",
-    "@types/react": "^17.0.11",
     "babel-jest": "^27.0.6",
     "eslint": "^7.29.0",
     "husky": "^6.0.0",
@@ -81,13 +77,9 @@
     "jest-watch-typeahead": "^0.6.4",
     "lerna": "^4.0.0",
     "lint-staged": "^11.0.0",
-    "lodash": "^4.17.21",
     "node-fetch": "^2.6.1",
     "prettier": "^2.3.2",
-    "react": "^17.0.2",
-    "react-test-renderer": "^17.0.2",
     "size-limit": "^5.0.1",
-    "swr": "^0.5.6",
     "typescript": "~4.3.4",
     "uritemplate-test": "https://github.com/uri-templates/uritemplate-test"
   },
@@ -104,14 +96,6 @@
         "@superdispatch/uri"
       ],
       "path": "packages/http/pkg/dist-web/index.js"
-    },
-    {
-      "ignore": [
-        "react",
-        "@superdispatch/uri",
-        "@superdispatch/http"
-      ],
-      "path": "packages/http-resource/pkg/dist-web/index.js"
     }
   ]
 }
