@@ -36,7 +36,7 @@ export function parseHTTPEndpoint<TParams extends URITemplateParams>(
       ? { method: 'GET', url: template }
       : {
           method: template.slice(0, indexOfSpace).toUpperCase(),
-          url: template.slice(indexOfSpace),
+          url: template.slice(indexOfSpace + 1),
         };
 
   // 3. Inject params to url, e.g:

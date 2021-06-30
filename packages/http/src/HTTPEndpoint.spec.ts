@@ -55,13 +55,13 @@ test.each([
 });
 
 test.each([
-  ['/users', 'GET'],
-  ['GET /users', 'GET'],
-  ['POST /users', 'POST'],
-  ['post /users', 'POST'],
-  ['CHICKEN /users', 'CHICKEN'],
-])('method parsing: %p -> %p', (endpoint, method) => {
-  expect(parseHTTPEndpoint(endpoint)).toMatchObject({ method });
+  ['/users', 'GET', '/users'],
+  ['GET /users', 'GET', '/users'],
+  ['POST /users', 'POST', '/users'],
+  ['post /users', 'POST', '/users'],
+  ['CHICKEN /users', 'CHICKEN', '/users'],
+])('method parsing: %p -> %p', (endpoint, method, url) => {
+  expect(parseHTTPEndpoint(endpoint)).toMatchObject({ url, method });
 });
 
 test.each([
