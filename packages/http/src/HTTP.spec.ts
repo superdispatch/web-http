@@ -21,14 +21,14 @@ function mockFetch(
 test('basic', async () => {
   const { request, requestJSON } = createHTTP();
 
-  await expect(request('/users')).resolves.toMatchObject({
+  await expect(request('GET /users')).resolves.toMatchObject({
     ok: true,
     url: '/users',
     status: 200,
     statusText: 'OK',
   });
 
-  await expect(requestJSON('/users')).resolves.toEqual({
+  await expect(requestJSON('GET /users')).resolves.toEqual({
     input: '/users',
     init: { method: 'GET' },
   });
@@ -48,11 +48,11 @@ test('error', async () => {
     response: { ok: false, status: 401, statusText: 'Unauthorized' },
   };
 
-  const response1 = request('/users');
+  const response1 = request('GET /users');
   await expect(response1).rejects.toBeInstanceOf(HTTPError);
   await expect(response1).rejects.toMatchObject(errorMatcher);
 
-  const response2 = requestJSON('/users');
+  const response2 = requestJSON('GET /users');
   await expect(response2).rejects.toBeInstanceOf(HTTPError);
   await expect(response2).rejects.toMatchObject(errorMatcher);
 });
@@ -71,8 +71,8 @@ test('unknown error status code', async () => {
     response: { ok: false, status: 999, statusText: undefined },
   };
 
-  await expect(request('/users')).rejects.toMatchObject(errorMatcher);
-  await expect(requestJSON('/users')).rejects.toMatchObject(errorMatcher);
+  await expect(request('GET /users')).rejects.toMatchObject(errorMatcher);
+  await expect(requestJSON('GET /users')).rejects.toMatchObject(errorMatcher);
 });
 
 test('options.fetch', async () => {
@@ -84,7 +84,7 @@ test('options.fetch', async () => {
   expect(fetch).not.toHaveBeenCalled();
   expect(globalFetch).not.toHaveBeenCalled();
 
-  await expect(request('/users')).resolves.toMatchObject({
+  await expect(request('GET /users')).resolves.toMatchObject({
     ok: true,
     status: 200,
     url: '/users',
@@ -93,7 +93,7 @@ test('options.fetch', async () => {
   expect(fetch).toHaveBeenCalledTimes(1);
   expect(globalFetch).not.toHaveBeenCalled();
 
-  await expect(requestJSON('/users')).resolves.toBeDefined();
+  await expect(requestJSON('GET /users')).resolves.toBeDefined();
 
   expect(fetch).toHaveBeenCalledTimes(2);
   expect(globalFetch).not.toHaveBeenCalled();
@@ -102,20 +102,20 @@ test('options.fetch', async () => {
 test('options.baseURL', async () => {
   const { request, requestJSON } = createHTTP({ baseURL: '/api' });
 
-  await expect(request('/users')).resolves.toMatchObject({
+  await expect(request('GET /users')).resolves.toMatchObject({
     url: '/api/users',
   });
 
-  await expect(requestJSON('/users')).resolves.toMatchObject({
+  await expect(requestJSON('GET /users')).resolves.toMatchObject({
     input: '/api/users',
   });
 
   await expect(
-    request('/users', { baseURL: 'https://example.com/api' }),
+    request('GET /users', { baseURL: 'https://example.com/api' }),
   ).resolves.toMatchObject({ url: 'https://example.com/api/users' });
 
   await expect(
-    requestJSON('/users', { baseURL: 'https://example.com/api' }),
+    requestJSON('GET /users', { baseURL: 'https://example.com/api' }),
   ).resolves.toMatchObject({ input: 'https://example.com/api/users' });
 });
 
@@ -131,11 +131,11 @@ test.each([
       baseURL: defaultBaseURL,
     });
 
-    const response = await request('/users', { baseURL: requestBaseURL });
+    const response = await request('GET /users', { baseURL: requestBaseURL });
     await expect(response.json()).resolves.toMatchObject({ input });
 
     await expect(
-      requestJSON('/users', { baseURL: requestBaseURL }),
+      requestJSON('GET /users', { baseURL: requestBaseURL }),
     ).resolves.toMatchObject({ input });
   },
 );
@@ -180,10 +180,10 @@ test.each([
       headers: defaultHeaders,
     });
 
-    const response = await request('/users', { headers: requestHeaders });
+    const response = await request('GET /users', { headers: requestHeaders });
     await expect(response.json()).resolves.toMatchObject({ init: expected });
     await expect(
-      requestJSON('/users', { headers: requestHeaders }),
+      requestJSON('GET /users', { headers: requestHeaders }),
     ).resolves.toMatchObject({ init: expected });
   },
 );
@@ -191,12 +191,14 @@ test.each([
 test('options.body', async () => {
   const { request, requestJSON } = createHTTP();
 
-  const response = await request('/users', { body: 'foo' });
+  const response = await request('GET /users', { body: 'foo' });
   await expect(response.json()).resolves.toMatchObject({
     init: { body: 'foo' },
   });
 
-  await expect(requestJSON('/users', { body: 'foo' })).resolves.toMatchObject({
+  await expect(
+    requestJSON('GET /users', { body: 'foo' }),
+  ).resolves.toMatchObject({
     init: { body: 'foo' },
   });
 });
@@ -204,13 +206,13 @@ test('options.body', async () => {
 test('options.json', async () => {
   const { request, requestJSON } = createHTTP();
 
-  const response = await request('/users', { json: { foo: 1 } });
+  const response = await request('GET /users', { json: { foo: 1 } });
   await expect(response.json()).resolves.toMatchObject({
     init: { body: '{"foo":1}' },
   });
 
   await expect(
-    requestJSON('/users', { json: { foo: 1 } }),
+    requestJSON('GET /users', { json: { foo: 1 } }),
   ).resolves.toMatchObject({
     init: { body: '{"foo":1}' },
   });
@@ -229,27 +231,27 @@ test('options.abortSignal', async () => {
 
   expect(abortSignals).toHaveLength(0);
 
-  await expect(request('/users')).resolves.toBeDefined();
+  await expect(request('GET /users')).resolves.toBeDefined();
 
   expect(abortSignals).toHaveLength(1);
   expect(abortSignals[0]).toBeUndefined();
 
   const abortController1 = new AbortController();
   await expect(
-    request('/users', { signal: abortController1.signal }),
+    request('GET /users', { signal: abortController1.signal }),
   ).resolves.toBeDefined();
 
   expect(abortSignals).toHaveLength(2);
   expect(abortSignals[1]).toBe(abortController1.signal);
 
-  await expect(requestJSON('/users')).resolves.toBeDefined();
+  await expect(requestJSON('GET /users')).resolves.toBeDefined();
 
   expect(abortSignals).toHaveLength(3);
   expect(abortSignals[2]).toBeUndefined();
 
   const abortController2 = new AbortController();
   await expect(
-    requestJSON('/users', { signal: abortController2.signal }),
+    requestJSON('GET /users', { signal: abortController2.signal }),
   ).resolves.toBeDefined();
 
   expect(abortSignals).toHaveLength(4);
@@ -262,12 +264,14 @@ test('options.parseJSON', async () => {
 
   expect(parseJSON).not.toHaveBeenCalled();
 
-  await expect(requestJSON('/users', { parseJSON })).resolves.toBe('/users');
+  await expect(requestJSON('GET /users', { parseJSON })).resolves.toBe(
+    '/users',
+  );
 
   expect(parseJSON).toHaveBeenCalledTimes(1);
 
   await expect(
-    requestJSON(['/users/{id}', { id: 1 }], { parseJSON }),
+    requestJSON(['GET /users/{id}', { id: 1 }], { parseJSON }),
   ).resolves.toBe('/users/1');
 
   expect(parseJSON).toHaveBeenCalledTimes(2);

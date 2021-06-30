@@ -54,6 +54,10 @@
       "jest-watch-typeahead/testname"
     ]
   },
+  "resolutions": {
+    "rollup-plugin-dts": "^3.0.2",
+    "typescript": "~4.3.4"
+  },
   "devDependencies": {
     "@pika/pack": "^0.5.0",
     "@pika/plugin-build-node": "^0.9.2",
@@ -71,6 +75,7 @@
     "@types/jest": "^26.0.23",
     "@types/node-fetch": "^2.5.10",
     "babel-jest": "^27.0.6",
+    "babel-plugin-dev-expression": "^0.2.2",
     "eslint": "^7.29.0",
     "husky": "^6.0.0",
     "jest": "^27.0.6",

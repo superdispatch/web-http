@@ -1,21 +1,109 @@
-import { parseHTTPEndpoint } from './HTTPEndpoint';
+import {
+  HTTPEndpoint,
+  HTTPEndpointInput,
+  HTTPEndpointTemplate,
+  parseHTTPEndpoint,
+} from './HTTPEndpoint';
 
 test('basic', () => {
   expect(
-    parseHTTPEndpoint<{ id: number }>(['/users/{id}/comments', { id: 1 }]),
+    parseHTTPEndpoint<{ id: number }>(['GET /users/{id}/comments', { id: 1 }]),
   ).toEqual({ method: 'GET', url: '/users/1/comments' });
 });
 
-test.each([
-  ['/api', '/api/users'],
-  ['/api/', '/api//users'],
-  ['https://example.com', 'https://example.com/users'],
-  ['https://example.com/api', 'https://example.com/api/users'],
-  ['https://example.com/api/v1', 'https://example.com/api/v1/users'],
-])('baseURL: %p -> %p', (baseURL, result) => {
-  expect(parseHTTPEndpoint('/users', { baseURL })).toMatchObject({
-    url: result,
+test.each<[HTTPEndpointInput, HTTPEndpoint]>([
+  ['GET /users', { method: 'GET', url: '/users' }],
+  [['GET /users/{id}', { id: 1 }], { method: 'GET', url: '/users/1' }],
+  [['GET /users/{id}', {}], { method: 'GET', url: '/users/' }],
+  [['GET /users{/id}', {}], { method: 'GET', url: '/users' }],
+  [['GET /users{/id}', { id: 1 }], { method: 'GET', url: '/users/1' }],
+])('input: %j -> %j', (input, expected) => {
+  expect(parseHTTPEndpoint(input)).toEqual(expected);
+});
+
+test.each<[HTTPEndpointTemplate, HTTPEndpoint]>([
+  ['GET /users', { method: 'GET', url: '/users' }],
+  ['POST /users', { method: 'POST', url: '/users' }],
+  ['PUT /users', { method: 'PUT', url: '/users' }],
+  ['PATCH /users', { method: 'PATCH', url: '/users' }],
+  ['DELETE /users', { method: 'DELETE', url: '/users' }],
+])('method: %p -> %j', (input, expected) => {
+  expect(parseHTTPEndpoint(input)).toMatchObject(expected);
+});
+
+test.each<[string, HTTPEndpoint, string]>([
+  [
+    '/users',
+    { method: 'GET', url: '/users' },
+    '[HTTP] "template" should have a method, received "/users".',
+  ],
+  [
+    'get /users',
+    { method: 'GET', url: '/users' },
+    '[HTTP] "template" method should be in uppercase, received "get" in "get /users".',
+  ],
+
+  [
+    'CHICKEN /users',
+    // @ts-expect-error should be accepted.
+    { method: 'CHICKEN', url: '/users' },
+    '[HTTP] "template" has unknown method "CHICKEN" in "CHICKEN /users".',
+  ],
+
+  [
+    'GET users',
+    { method: 'GET', url: '/users' },
+    '[HTTP] "template" should start with slash, received "GET users".',
+  ],
+])('invalid input: %p -> %p, %p', (input, expected, error) => {
+  const consoleError = jest.spyOn(console, 'error').mockImplementation();
+
+  // @ts-expect-error should normalize input method.
+  expect(parseHTTPEndpoint(input)).toMatchObject(expected);
+  expect(consoleError).toHaveBeenCalledTimes(1);
+  expect(consoleError).toHaveBeenLastCalledWith(error);
+});
+
+test.each<[string, HTTPEndpointInput, string]>([
+  ['/api', 'GET /users', '/api/users'],
+  ['https://example.com', 'GET /users', 'https://example.com/users'],
+  ['https://example.com/api', 'GET /users', 'https://example.com/api/users'],
+  [
+    'https://example.com/api/v1',
+    'GET /users',
+    'https://example.com/api/v1/users',
+  ],
+])('baseURL: %p + %p -> %p', (baseURL, input, url) => {
+  expect(parseHTTPEndpoint(input, { baseURL })).toMatchObject({
+    url,
   });
+});
+
+test.each<[string, HTTPEndpointInput, string, string]>([
+  [
+    '/api/',
+    'GET /users',
+    '/api/users',
+    '[HTTP] "baseURL" option should not end with slash, received "/api/"',
+  ],
+  [
+    'https://example.com/',
+    'GET /users',
+    'https://example.com/users',
+    '[HTTP] "baseURL" option should not end with slash, received "https://example.com/"',
+  ],
+  [
+    'https://example.com/api////',
+    'GET /users',
+    'https://example.com/api/users',
+    '[HTTP] "baseURL" option should not end with slash, received "https://example.com/api////"',
+  ],
+])('invalid baseURL: %p + %p -> %s', (baseURL, input, url, error) => {
+  const consoleError = jest.spyOn(console, 'error').mockImplementation();
+
+  expect(parseHTTPEndpoint(input, { baseURL })).toMatchObject({ url });
+  expect(consoleError).toHaveBeenCalledTimes(1);
+  expect(consoleError).toHaveBeenLastCalledWith(error);
 });
 
 test.each([
@@ -34,7 +122,7 @@ test.each([
     },
   ],
 ])('header: %p -> %p', (headers, expected) => {
-  expect(parseHTTPEndpoint('/users', { headers })).toMatchObject(expected);
+  expect(parseHTTPEndpoint('GET /users', { headers })).toMatchObject(expected);
 });
 
 test.each([['text', 'text']])('body: %p -> %p', (body, result) => {
@@ -55,16 +143,6 @@ test.each([
 });
 
 test.each([
-  ['/users', 'GET', '/users'],
-  ['GET /users', 'GET', '/users'],
-  ['POST /users', 'POST', '/users'],
-  ['post /users', 'POST', '/users'],
-  ['CHICKEN /users', 'CHICKEN', '/users'],
-])('method parsing: %p -> %p', (endpoint, method, url) => {
-  expect(parseHTTPEndpoint(endpoint)).toMatchObject({ url, method });
-});
-
-test.each([
   [{}, '/users'],
   [{ page: 2 }, '/users?page=2'],
   [{ page_size: 5 }, '/users?page_size=5'],
@@ -72,7 +150,7 @@ test.each([
 ])('query expansion: %p -> %p', (params, url) => {
   expect(
     parseHTTPEndpoint<{ page?: number; page_size?: number }>([
-      '/users{?page,page_size}',
+      'GET /users{?page,page_size}',
       params,
     ]),
   ).toMatchObject({ url });
@@ -86,7 +164,7 @@ test.each([
 ])('query continuation: %p -> %p', (params, url) => {
   expect(
     parseHTTPEndpoint<{ page?: number; q?: string }>([
-      '/users?page_size=10{&q,page}',
+      'GET /users?page_size=10{&q,page}',
       params,
     ]),
   ).toMatchObject({ url });

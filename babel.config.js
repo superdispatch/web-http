@@ -4,6 +4,7 @@ module.exports = (api) => {
   api.cache.using(() => JSON.stringify([process.env.NODE_ENV]));
 
   return {
+    plugins: ['babel-plugin-dev-expression'],
     presets: [
       [
         '@superdispatch/babel-preset',
