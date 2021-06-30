@@ -8,7 +8,9 @@ function parseEndpointTemplate<T extends URITemplateParams>(
   params?: T,
 ): [method: string, url: string] {
   let method = DEFAULT_METHOD;
-  const matches = METHOD_PATTERN.exec(url);
+  const matches = METHOD_PATTERN.exec(url) as
+    | null
+    | [template: string, method: string, url: string];
 
   if (matches) {
     [, method, url] = matches;

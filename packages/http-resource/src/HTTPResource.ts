@@ -14,7 +14,7 @@ export type HTTPResource<TData, TError = Error> = SWRResponse<TData, TError>;
 export function useHTTPResource<
   TData,
   TParams extends URITemplateParams = URITemplateParams,
-  TError = Error
+  TError = Error,
 >(
   input: null | HTTPResourceInput<TParams>,
   fetcher: HTTPResourceFetcher<TData>,

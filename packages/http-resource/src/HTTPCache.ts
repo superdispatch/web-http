@@ -11,7 +11,7 @@ export function revalidateHTTPResource<TParams extends URITemplateParams>(
 
 export function mutateHTTPResource<
   TData,
-  TParams extends URITemplateParams = URITemplateParams
+  TParams extends URITemplateParams = URITemplateParams,
 >(
   input: HTTPResourceInput<TParams>,
   fn: (prev?: TData) => TData | undefined,
@@ -26,7 +26,7 @@ export function clearHTTPResourceCache() {
 
 export function readCachedHTTPResource<
   TData,
-  TParams extends URITemplateParams = URITemplateParams
+  TParams extends URITemplateParams = URITemplateParams,
 >(input: HTTPResourceInput<TParams>): TData | undefined {
   return cache.get(inputToKey(input)) as TData | undefined;
 }

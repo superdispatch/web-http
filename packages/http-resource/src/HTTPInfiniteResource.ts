@@ -15,7 +15,7 @@ export type HTTPInfiniteResourceOptions<TData, TError = Error> = Omit<
 
 export type HTTPInfiniteResourceParamFactory<
   TData,
-  TParams extends URITemplateParams = URITemplateParams
+  TParams extends URITemplateParams = URITemplateParams,
 > = (index: number, prev: TData | null) => null | HTTPEndpointParams<TParams>;
 
 export type HTTPInfiniteResource<TData, TError = Error> = Omit<
@@ -26,7 +26,7 @@ export type HTTPInfiniteResource<TData, TError = Error> = Omit<
 export function useHTTPInfiniteResource<
   TData,
   TParams extends URITemplateParams = URITemplateParams,
-  TError = Error
+  TError = Error,
 >(
   input: HTTPResourceInput<TParams>,
   makeParams: HTTPInfiniteResourceParamFactory<TData, TParams>,

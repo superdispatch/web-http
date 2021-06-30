@@ -23,7 +23,7 @@ export type HTTPResourceOptions<TData> = Omit<
 
 export function useHTTPResource<
   TData,
-  TParams extends URITemplateParams = URITemplateParams
+  TParams extends URITemplateParams = URITemplateParams,
 >(
   input: null | HTTPResourceInput<TParams>,
   fetcher: HTTPResourceFetcher<TData>,
@@ -95,12 +95,12 @@ export type HTTPInfiniteResourceOptions<TData> = Omit<
 
 export type HTTPInfiniteResourceParamFactory<
   TData,
-  TParams extends URITemplateParams = URITemplateParams
+  TParams extends URITemplateParams = URITemplateParams,
 > = (index: number, prev: TData | null) => null | HTTPEndpointParams<TParams>;
 
 export function useHTTPInfiniteResource<
   TData,
-  TParams extends URITemplateParams = URITemplateParams
+  TParams extends URITemplateParams = URITemplateParams,
 >(
   input: HTTPResourceInput<TParams>,
   makeParams: HTTPInfiniteResourceParamFactory<TData, TParams>,
