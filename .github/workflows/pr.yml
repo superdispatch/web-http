@@ -7,13 +7,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: styfle/cancel-workflow-action@0.7.0
+      - uses: styfle/cancel-workflow-action@0.9.1
       - uses: actions/checkout@v2
       - uses: umidbekk/actions/npm/install@v1
       - run: yarn tsc
       - run: yarn lint
       - run: yarn test
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v2
       - uses: EndBug/add-and-commit@v7
         if: ${{ failure() && github.actor == 'renovate' }}
 
