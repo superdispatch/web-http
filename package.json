@@ -77,7 +77,7 @@
     "babel-jest": "^27.0.6",
     "babel-plugin-dev-expression": "^0.2.2",
     "eslint": "^7.29.0",
-    "husky": "^6.0.0",
+    "husky": "7.0.2",
     "jest": "^27.0.6",
     "jest-watch-typeahead": "^0.6.4",
     "lerna": "^4.0.0",
