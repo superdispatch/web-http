@@ -72,7 +72,7 @@
     "@superdispatch/js-tools": "^0.4.0",
     "@superdispatch/prettier-config": "^0.4.0",
     "@superdispatch/tsconfig": "^0.4.0",
-    "@types/jest": "^26.0.23",
+    "@types/jest": "27.0.1",
     "@types/node-fetch": "^2.5.10",
     "babel-jest": "^27.0.6",
     "babel-plugin-dev-expression": "^0.2.2",
