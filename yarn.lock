@@ -2342,7 +2342,7 @@
     babel-plugin-dev-expression "^0.2.2"
     babel-plugin-transform-react-remove-prop-types "^0.4.24"
 
-"@superdispatch/eslint-plugin@^0.4.1":
+"@superdispatch/eslint-plugin@0.4.1":
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/@superdispatch/eslint-plugin/-/eslint-plugin-0.4.1.tgz#7f8962584a08617c3ee727a9f1e495290359cdef"
   integrity sha512-BLVBOGxQSd8fAKLs/XmNytB87PyO9KPsti8RzC76vk6MYV2iYcIfVjdbpzAGg7R0ZIaxsw21dEpmN95X8OZCfg==
@@ -2371,7 +2371,7 @@
   dependencies:
     dequal "^2.0.2"
 
-"@superdispatch/js-tools@^0.4.0":
+"@superdispatch/js-tools@0.4.0":
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/@superdispatch/js-tools/-/js-tools-0.4.0.tgz#6b201b771af4f30743a8ba65f9e8ec04dbd394bf"
   integrity sha512-fgKFeehkW4koeSGgbV2KNGTZuIY8Z0+Nte/QpnOqHD32MtSTNdirtXMgdFzd88B1F5H8/PMlaILRhVifJjZwlw==
@@ -2385,7 +2385,7 @@
     listr "^0.14.3"
     yarn-deduplicate "^3.1.0"
 
-"@superdispatch/prettier-config@^0.4.0":
+"@superdispatch/prettier-config@0.4.0":
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/@superdispatch/prettier-config/-/prettier-config-0.4.0.tgz#534be3ba73e64c68eca2e877431385af3bc9f6a6"
   integrity sha512-ZzpR9aXbU6vidRL2cQrgi/Ksi4bWilrse6YwjuX5aQVlLOmO6hL+0QNaiTGQw8uxRUB7t8aWnJI5jH1bW8Q13Q==
@@ -2393,7 +2393,7 @@
     prettier-plugin-organize-imports "^2.1.0"
     prettier-plugin-packagejson "^2.2.9"
 
-"@superdispatch/tsconfig@^0.4.0":
+"@superdispatch/tsconfig@0.4.0":
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/@superdispatch/tsconfig/-/tsconfig-0.4.0.tgz#c58b53ee66a0d87656192fe4fe19f5c06efdeee5"
   integrity sha512-FScUsMwxcPD71CaoTgIoGh/Es2sZo1+C4l9rD6DOUk6v7lvkbhlsHWUcH8hvhoxiP7fDHjuoyN5nN5N9PHP2Bw==
