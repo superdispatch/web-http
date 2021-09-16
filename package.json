@@ -56,7 +56,7 @@
   },
   "resolutions": {
     "rollup-plugin-dts": "^3.0.2",
-    "typescript": "4.4.2"
+    "typescript": "4.4.3"
   },
   "devDependencies": {
     "@pika/pack": "^0.5.0",
@@ -85,7 +85,7 @@
     "node-fetch": "2.6.2",
     "prettier": "2.4.0",
     "size-limit": "5.0.3",
-    "typescript": "4.4.2",
+    "typescript": "4.4.3",
     "uritemplate-test": "https://github.com/uri-templates/uritemplate-test"
   },
   "engines": {
