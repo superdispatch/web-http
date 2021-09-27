@@ -55,7 +55,7 @@
     ]
   },
   "resolutions": {
-    "rollup-plugin-dts": "^3.0.2",
+    "rollup-plugin-dts": "^4.0.0",
     "typescript": "4.4.3"
   },
   "devDependencies": {
