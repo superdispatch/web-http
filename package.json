@@ -84,7 +84,7 @@
     "lint-staged": "11.1.2",
     "node-fetch": "2.6.5",
     "prettier": "2.4.1",
-    "size-limit": "5.0.4",
+    "size-limit": "5.0.5",
     "typescript": "4.5.5",
     "uritemplate-test": "https://github.com/uri-templates/uritemplate-test"
   },
