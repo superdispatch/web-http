@@ -83,7 +83,7 @@
     "lerna": "4.0.0",
     "lint-staged": "11.2.6",
     "node-fetch": "2.6.5",
-    "prettier": "2.4.1",
+    "prettier": "2.6.0",
     "size-limit": "5.0.5",
     "typescript": "4.5.5",
     "uritemplate-test": "https://github.com/uri-templates/uritemplate-test"
