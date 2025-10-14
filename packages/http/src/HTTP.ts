@@ -67,6 +67,7 @@ export function createHTTP({
 
     if (fetcher == null) fetcher = fetch;
     if (signal) requestInit.signal = signal;
+    if (options.withCredentials) requestInit.credentials = 'include';
     if (endpoint.body != null) requestInit.body = endpoint.body;
 
     return fetcher(endpoint.url, requestInit).then((response) => {

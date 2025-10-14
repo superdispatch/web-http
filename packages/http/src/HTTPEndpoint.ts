@@ -27,6 +27,7 @@ export interface HTTPEndpointOptions {
   body?: BodyInit;
   baseURL?: string;
   headers?: Record<string, string>;
+  withCredentials?: boolean;
 }
 
 export type HTTPEndpointTemplate = `${HTTPEndpointMethod} /${string}`;

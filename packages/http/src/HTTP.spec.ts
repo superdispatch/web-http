@@ -276,3 +276,12 @@ test('options.parseJSON', async () => {
 
   expect(parseJSON).toHaveBeenCalledTimes(2);
 });
+
+test('options.withCredentials', async () => {
+  const { request } = createHTTP();
+
+  const response = await request('GET /users', { withCredentials: true });
+  await expect(response.json()).resolves.toMatchObject({
+    init: { credentials: 'include' },
+  });
+});
