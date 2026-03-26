@@ -10,7 +10,10 @@
   "module": "pkg/dist-web/index.js",
   "types": "src/index.ts",
   "scripts": {
-    "version": "pika build"
+    "version": "pika-pack build"
+  },
+  "devDependencies": {
+    "@pika/pack": "0.5.0"
   },
   "publishConfig": {
     "access": "public",
