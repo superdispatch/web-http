@@ -25,6 +25,8 @@ jobs:
         with:
           pnpm-version: 10
       - uses: superdispatch/actions/build-size/limit@v2
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
         with:
           install_command: 'pnpm install'
           build_command: 'pnpm build'
