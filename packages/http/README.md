@@ -6,7 +6,7 @@
 ### Installation
 
 ```bash
-yarn add @superdispatch/http
+pnpm add @superdispatch/http
 ```
 
 ### Usage

@@ -20,6 +20,7 @@ test('spec content', () => {
   `);
   expect(Object.keys(examplesBySection)).toMatchInlineSnapshot(`
     Array [
+      "2.1 Literals",
       "3.2.1 Variable Expansion",
       "3.2.2 Simple String Expansion",
       "3.2.3 Reserved Expansion",
@@ -38,6 +39,7 @@ test('spec content', () => {
       "Additional Examples 3: Empty Variables",
       "Additional Examples 4: Numeric Keys",
       "Additional Examples 5: Explode Combinations",
+      "Additional Examples 6: Reserved Expansion",
     ]
   `);
 });

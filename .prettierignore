@@ -1,3 +1,4 @@
 pkg/
 coverage/
 lerna.json
+pnpm-lock.yaml

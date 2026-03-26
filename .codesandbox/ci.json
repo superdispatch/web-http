@@ -1,5 +1,5 @@
 {
-  "node": "12",
+  "node": "24",
   "buildCommand": "build",
   "packages": ["packages/uri", "packages/http"],
   "publishDirectory": {
