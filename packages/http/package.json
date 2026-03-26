@@ -10,13 +10,16 @@
   "module": "pkg/dist-web/index.js",
   "types": "src/index.ts",
   "scripts": {
-    "version": "pika build"
+    "version": "pika-pack build"
   },
   "dependencies": {
     "@superdispatch/uri": "^0.5.0"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.0.0"
+  },
+  "devDependencies": {
+    "@pika/pack": "0.5.0"
   },
   "publishConfig": {
     "access": "public",

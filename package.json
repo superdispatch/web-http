@@ -79,6 +79,11 @@
     "typescript": "4.6.4",
     "uritemplate-test": "https://github.com/uri-templates/uritemplate-test"
   },
+  "pnpm": {
+    "overrides": {
+      "rollup-plugin-dts": "^3.0.2"
+    }
+  },
   "engines": {
     "node": ">=24"
   },
